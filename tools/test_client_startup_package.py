@@ -297,7 +297,17 @@ with zipfile.ZipFile(package)as z,zipfile.ZipFile(ROOT/'dist/milestones/Client_C
  dynamic=subprocess.check_output([str(LLVM/'llvm-readelf'),'-d',str(elf)],text=True);assert 'libkernel_sys.sprx' not in dynamic
  baseline_dynamic=subprocess.check_output([str(LLVM/'llvm-readelf'),'-d',str(ROOT/'dist/candidates/ProsperoCraft-01.000.153/bootstrap-symbols.elf')],text=True)
  needed=lambda text:{line.split('[')[1].split(']')[0]for line in text.splitlines()if '(NEEDED)' in line}
- assert needed(dynamic)==needed(baseline_dynamic),'Hardware presentation added a mandatory library beyond153'
+ assert needed(dynamic)==needed(baseline_dynamic)|{'libSceAudioIn.sprx'},'Only the explicit170AudioIn dependency may extend153; hardware presentation adds none'
+ assert all(name in imports for name in ['sceAudioInInit','sceAudioInOpen','sceAudioInInput','sceAudioInClose','sceAudioInGetSilentState','sceAudioInGetRerouteCount'])
+ for name in ['Java_ProsperoMicrophone_nativeEnable','Java_ProsperoMicrophone_nativeProbe']:assert symbols.get(name),name
+ undefined=subprocess.check_output([str(LLVM/'llvm-nm'),'--undefined-only',str(elf)],text=True)
+ for name in ['sceAudioInInit','sceAudioInOpen','sceAudioInInput','sceAudioInClose','sceAudioInGetSilentState','sceAudioInGetRerouteCount']:assert ' U '+name in undefined,name
+ capture_audit=json.loads(z.read(prefix+'assets/java25/openal-audit.json'))['startup_boundaries']['speaker_backend']
+ assert capture_audit['capture_header_sha256']==sha((ROOT/'client/ports/openal/ps5_capture.hpp').read_bytes())
+ assert z.read(prefix+'assets/java25/QR-LICENSE.txt')==(ROOT/'client/launcher/QR-LICENSE.txt').read_bytes()
+ assert z.read(prefix+'assets/java25/launcher-icon-source/attribution.json')==(ROOT/'assets/launcher-icons/attribution.json').read_bytes()
+ with zipfile.ZipFile(io.BytesIO(z.read(prefix+'assets/java25/client-probe.jar'))) as current_jar:
+  for name in ['ProsperoWeb.class','ProsperoWebPage.class','ProsperoWebIcons.class','ProsperoMicrophone.class','ProsperoTheme.class','ProsperoQrCode.class']:assert name in current_jar.namelist(),name
  bootstrap=(ROOT/'client/startup/bootstrap.cpp').read_text();entry=bootstrap[bootstrap.index('int main(int argc,char** argv) {'):]
  assert entry.index('ps5::log_share::start()')<entry.index('prospero_menu::hardware::initialize()')<entry.index('prospero_menu::start_frontend()')
 

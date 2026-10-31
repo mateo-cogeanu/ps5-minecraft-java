@@ -4,16 +4,32 @@
   "title_id": "PPSA99874",
   "acceptance": {
     "launcher_input": "host-pass; PS5 pending",
-    "local_web": "real-socket host-pass; redesigned browser preview pending settings",
+    "local_web": "real-socket host-pass; redesigned UI Firefox desktop +390px pass; PS5 pending",
     "microphone": "opt-in real AudioIn/OpenAL implementation; actual-core/real-OpenAL host-pass; PS5 ABI/speech/mute/voice-chat pending"
   },
   "checks": {
     "fast": "15 PASS",
     "native": "6 PASS with ASan/UBSan; existing JVM/sanitizer signal-handler warnings",
     "real_OpenAL": "PASS playback failure/recovery/pacing fixtures plus capture default-off/enable/enumerate/start/float read/stop/close x20; host OS doubles only",
-    "full_SDK": "initial170PASS; final source rebuild pending",
+    "full_SDK": "PASS full current-client build plus targeted final AudioIn/header rebuild and complete current Java/native embedding/link/signatures/package",
     "native_preview": "PASS111-field actual draw/mailbox/JNI cleanup fixture; not PS5/Vulkan evidence",
-    "browser": "initial manager desktop/390px pairing/upload/navigation/focus passed; redesigned cards/category UI awaiting browser access"
+    "browser": "PASS real Firefox: launcher icon cards/home/direct instance, pairing, Mods/Resource packs/Shaders/Schematics and Litematica/WorldEdit choice,390px responsive layout, actual generated ZIP upload/progress/list refresh. IAB settings stale; native Firefox fallback used.",
+    "package": "PASS complete test_client_startup_package, including exactly one added AudioIn dependency, six genuine undefined resident imports, two JNI functions, exact capture source hash and QR/icon licenses",
+    "relink": "PASS normal and accepted-OpenAL replacement paths both reproduce exact final ELF",
+    "source_kit": "PASS all manifest input sizes/hashes/ZIP CRC and exact capture/backend/JNI/import corresponding source",
+    "startup_host": "PASS current classes, startup policy/observer/CPU and original unmodified Main reaches expected missing host-native boundary; no PS5 startup claim",
+    "hosted_policy": {
+      "commit": "a5dae04d6630351fc3b284f0fd42d55b4cf885e8",
+      "url": "https://github.com/mateo-cogeanu/ProsperoCraft/actions/runs/41200061596",
+      "ubuntu-24.04": "success",
+      "macos-15": "success"
+    },
+    "hosted_native": {
+      "commit": "a5dae04d6630351fc3b284f0fd42d55b4cf885e8",
+      "url": "https://github.com/mateo-cogeanu/ProsperoCraft/actions/runs/41200168508",
+      "ubuntu-24.04": "success",
+      "macos-15": "success"
+    }
   },
   "console": {
     "speech_and_mute": "not tested",
@@ -25,5 +41,21 @@
   },
   "release_created": false,
   "store_updated": false,
-  "runtime_source_changed": false
+  "runtime_source_changed": false,
+  "source_commit": "a5dae04d6630351fc3b284f0fd42d55b4cf885e8",
+  "source_tree_at_build": "Only validation documentation modified; implementation from published commit",
+  "artifacts": {
+    "PPSA99874.zip": {
+      "bytes": 124169634,
+      "sha256": "d8675f27b86866e881c92e0e16d946ce417f63ba10d486e0cca424658e46d1c0"
+    },
+    "bootstrap-symbols.elf": {
+      "bytes": 174511680,
+      "sha256": "5c18898fe2e096f4f7fa8a98d24f15dc17140bb7a1217d55ad17d5f343251abc"
+    },
+    "client170-openal-source-relink.zip": {
+      "bytes": 92295698,
+      "sha256": "3feaa7c40615a08f027738e8eb04743f2f95f7854d3429042eb7c6a5cb475f5c"
+    }
+  }
 }
