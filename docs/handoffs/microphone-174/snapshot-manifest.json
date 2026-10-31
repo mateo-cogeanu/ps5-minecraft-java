@@ -1,0 +1,239 @@
+{
+  "snapshot_date": "2026-10-31",
+  "purpose": "Claude bounded microphone/SVC capture specialist assignment; Codex remains primary maintainer; hashes identify handoff source, not physical-console acceptance; do not revert newer changes",
+  "consumer": {
+    "workspace": "/Users/mateocogeanu/Documents/ChatGPT/PS5_Homebrew/.tools/github-publish/ps5-minecraft-java",
+    "repository": "https://github.com/mateo-cogeanu/ProsperoCraft",
+    "base_commit": "20c07e38a1318208269c6360b4e9154c53aefcf6",
+    "implementation_commit": "42b397cd12f5f25464e3967cd85a16c1c4bceb8c",
+    "files": {
+      "AGENTS.md": {
+        "sha256": "96876aa312dff31ae55ec8849b64f4f13adfeb4e70cdb426be20e06879b2b0e8",
+        "bytes": 8557
+      },
+      "README.md": {
+        "sha256": "64fd2206698c33de6db20b59d3dc2f346668f30a4ea0ef8a3d63d9fc1a96d83d",
+        "bytes": 19816
+      },
+      "docs/maintainer-constraints.md": {
+        "sha256": "daae9c8d0a99e433912b5d1043bfb7421e22811b0e1aa946348fb9dc1d7f1f2c",
+        "bytes": 12103
+      },
+      "docs/controller-microphone-investigation.md": {
+        "sha256": "d19d8ea6622b80fc7b7af4153d6644044059b6322e5072dd6ec5a713a04ea5d1",
+        "bytes": 8702
+      },
+      "docs/client-mic-disconnect-174.md": {
+        "sha256": "65cc22852897c13a696c5a54cee20ce9ad116cd99f2f22940cdb3977e0e6c4d7",
+        "bytes": 4605
+      },
+      "docs/client-voice-speaker-173.md": {
+        "sha256": "38477818ea418db2538ffd634874daece7190ac7a91423f2f76415aa8be3b895",
+        "bytes": 4331
+      },
+      "docs/client-terrain-thread-budget-172.md": {
+        "sha256": "84fb7e9bce0aab1c3101f3e08cf7cc482b93c9b28c2e37ba58271925969ab49b",
+        "bytes": 3533
+      },
+      "docs/local-build-storage.md": {
+        "sha256": "15141ed06f7453b0e9aa86620973d075022840d7b31f8503b09ab5de72ccfe38",
+        "bytes": 2392
+      },
+      "docs/host-testing.md": {
+        "sha256": "d90b2e90f3d3472bab107f83f0a005b95a1278e9308489260e7fa344bfbbf218",
+        "bytes": 7495
+      },
+      "docs/host-test-inventory.md": {
+        "sha256": "6aefd392e3a663beabc141bf3c5dd11a247a8e6b91ec8ef68a0f9d927e58af05",
+        "bytes": 38641
+      },
+      "docs/validation/client174-mic-disconnect.json": {
+        "sha256": "2f0142f7390bdfeabaf0d8600b6789b37f64e776428db803e7906555fafd871a",
+        "bytes": 1786
+      },
+      "client/ports/openal/ps5_capture.hpp": {
+        "sha256": "bb0c6d499cdc4fb2fc4c19d314a108c725819fd3edb1a62ff5864eb7d239bf10",
+        "bytes": 4298
+      },
+      "client/ports/openal/ps5_backend.cpp": {
+        "sha256": "21f3324c0423e44063f3b5e9df09d7eee6bc74949d621e29b775a6cbcc95631e",
+        "bytes": 13535
+      },
+      "client/ports/openal/ps5_backend.h": {
+        "sha256": "17682abae06397cfb76087dc007b8eded74f9292c5eeae1eea4fb60db399c210",
+        "bytes": 449
+      },
+      "client/ports/openal/ps5_audio_mutex.hpp": {
+        "sha256": "4ecdd18872724a2f9bcfad961d4aa374824a393cbc81ecf2a5d4db3b2f6c044f",
+        "bytes": 910
+      },
+      "client/ports/openal/ps5_mixer_workers.hpp": {
+        "sha256": "7cbe35f2dcc173246c4480bd05f49d9f563ec4fe37e1bcb0bc2c6c6af1b0fe57",
+        "bytes": 2424
+      },
+      "client/ports/openal/ps5_thread_error.hpp": {
+        "sha256": "6c931da4bc69a6fafdb0e9e391acb9b161deabe0b4a90d870851e5eb7bf58727",
+        "bytes": 1804
+      },
+      "client/ports/openal/ps5_port_pool.hpp": {
+        "sha256": "845400aa24b969961f7fce3356ef6760f026a410132f6b1768eeb9181c2131d9",
+        "bytes": 708
+      },
+      "client/ports/openal/microphone_jni.c": {
+        "sha256": "537289a6b5f17940c8d8ab84e155b2585a7749d55a9e086c276cda0b5acf3204",
+        "bytes": 522
+      },
+      "client/ports/openal/ps5_audioin_imports.c": {
+        "sha256": "d273673c91165756664285128b35157cbb966ac532672a1e7c66f9abb2274cd1",
+        "bytes": 374
+      },
+      "client/ports/openal/sources.json": {
+        "sha256": "277e6a54888c000897b06e32ab6e4a49ef7a13ff33c3dbe9e73872699c40cbe6",
+        "bytes": 413
+      },
+      "client/ports/voicechat-investigation.json": {
+        "sha256": "5fb8fdc78e5ce73736daedd024acc2b40ae3bc90bd4bd39c0858f7bef133f602",
+        "bytes": 3678
+      },
+      "client/ports/socket-preclose-runtime.json": {
+        "sha256": "825bb1f958802facd08e1e4a91dc0e315d499f7131408b35f0fcb4cd889f08be",
+        "bytes": 853
+      },
+      "client/ports/thread-stack-runtime.json": {
+        "sha256": "ab15c43b01cab6d1a2dbb44eb8de21067f88d8f1fd656bfebf3cb520d7e946aa",
+        "bytes": 1082
+      },
+      "client/launcher/java/ProsperoMicrophone.java": {
+        "sha256": "c88aabf8f08e18e50623c038ac6d363a4ec33419dda23bd12ffe7f43ea044163",
+        "bytes": 822
+      },
+      "client/launcher/java/ProsperoLauncher.java": {
+        "sha256": "2ec8ab2daa9c8ff8984cc02c168e0d35979466290c171c0b0f611a309d468084",
+        "bytes": 48599
+      },
+      "client/launcher/java/ProsperoLibrary.java": {
+        "sha256": "257982bf563e1edb0c2f34ec7daf75ddac2f23eb478d2d41646613e3d30da1d4",
+        "bytes": 16548
+      },
+      "client/startup/bootstrap.cpp": {
+        "sha256": "6565ca504db190fd3d4755da232b04b71c852bedaff752ac07d9d0466d7f4b52",
+        "bytes": 38597
+      },
+      "client/startup/param.json": {
+        "sha256": "a3ec7f2227b60d4565be7b7d15fec60e8f8d68ee514e428fe299678cf1f11edb",
+        "bytes": 876
+      },
+      "client/startup/openal_trace_env.c": {
+        "sha256": "ccbf0015c3fe0590c4d75216c67b9b6654e4d8b687d91bada73b1cb749454551",
+        "bytes": 744
+      },
+      "tools/build_openal_native.py": {
+        "sha256": "88a867862147668f6d4c23039bd4680f7e9a8195fc3238575410a433dfc375c0",
+        "bytes": 10073
+      },
+      "tools/build_openal_startup_boundaries.py": {
+        "sha256": "0d26cca18911eaddae8da097517bb807953168a90aa39ddf5db83c711ba41d27",
+        "bytes": 11541
+      },
+      "tools/package_client_vulkan.py": {
+        "sha256": "555f4fff17e838bcb93d8357a0dae4bde1217e6cb5e15cf4019cb333f10e8db8",
+        "bytes": 31220
+      },
+      "tools/build_client_openal_relink.py": {
+        "sha256": "96f903f5e190392e7a60340ae4d9c40420522e1dca786bc8e76a6cd76771c329",
+        "bytes": 17111
+      },
+      "tools/relink_client_openal.py": {
+        "sha256": "6aba58a2c6610f28cb37b766044b173a68345cc4aaec9c6283c69fff93720ab3",
+        "bytes": 2388
+      },
+      "tools/build_client_openal_replacement.py": {
+        "sha256": "2b9072b505740be5da4a633966488dc23bc0dadb6cdb33f838978ff5668d8061",
+        "bytes": 3334
+      },
+      "tools/test_microphone_capture.py": {
+        "sha256": "d26e63910e84008688b8090591a61c192920a139b9d02fe41efb87c29a56e9f2",
+        "bytes": 3699
+      },
+      "tools/test_openal_ps5_audio.py": {
+        "sha256": "77728320a95c232962d0ab71ff9763d9802d1ac226066476ecf58a79ccdd3d8b",
+        "bytes": 12657
+      },
+      "tools/test_client_startup_host.py": {
+        "sha256": "861c585b72389ca3bdb5670b018b3125d05f1d5c81bca5c7e007923f14a0c80b",
+        "bytes": 15670
+      },
+      "tools/test_client_startup_package.py": {
+        "sha256": "4f4f502d4526001af559a7b3e4a58b9c3fc468bf8b3b3e9a1bae972f781a24a9",
+        "bytes": 55939
+      },
+      "tools/run_host_tests.py": {
+        "sha256": "8d5cdd4294d06e1341a72294c4cc82f416c012741caf64c32085c4332b4f8655",
+        "bytes": 3287
+      },
+      "tools/host_toolchain.py": {
+        "sha256": "6f00ec7dfdb0ddbf9f57a44a7592f0f9ff66feabc8cfba5e29950520f44e7e2c",
+        "bytes": 4194
+      },
+      "tests/host-lanes.json": {
+        "sha256": "263f846866f3221e8f197ead81ce2146b5c479c28eb63e6965209a21b651ce55",
+        "bytes": 757
+      },
+      "tests/fixtures/native-needed-libraries.json": {
+        "sha256": "5022d88318d6c11f4f0ea528d61ceea420fc9c049e390d9c0423bee78a1fc17f",
+        "bytes": 665
+      }
+    }
+  },
+  "runtime": {
+    "workspace": "/Users/mateocogeanu/Documents/ChatGPT/PS5_Homebrew",
+    "repository": "https://github.com/mateo-cogeanu/ps5-java25-homebrew",
+    "published_layout_prefix": "Development/ (except repository-root AGENTS.md)",
+    "commit": "f12c86e4f965ff46d0f5d121cd07ff8f27d7baaf",
+    "files": {
+      "AGENTS.md": {
+        "sha256": "ceed751c73d79eb60b043614292df4cb9dcda9730a164223cc3cb5dc1e46010d",
+        "bytes": 20460
+      },
+      "java25/patches/0135-ps5-socket-preclose-shutdown.patch": {
+        "sha256": "161f0ed61cf60f314e7130bbd566501e0c9f79a2a03c3b2966b7c33a3c4672b2",
+        "bytes": 1254
+      },
+      "tools/test_java25_socket_preclose.py": {
+        "sha256": "1fff9c6cec990a75564bff23534bbf7894731d3f251f3c2753982f9bbf4d0435",
+        "bytes": 7193
+      },
+      "docs/java25-socket-preclose.md": {
+        "sha256": "3ee0ea9d9d9d2ddaf608363f6de3866f0d929a0b977ad6d87defcc3907d31ae9",
+        "bytes": 1835
+      },
+      "docs/java25-socket-preclose-validation.json": {
+        "sha256": "0584db5ed3c5bcf9af666c3511a9c4a9b7063d131856844f3323c5218fb599d5",
+        "bytes": 1138
+      },
+      "tools/java25_cxxabi_tls.py": {
+        "sha256": "2eaa0d729090ee906ac39641c71c3df95d33b4143bb1af9abf4ead99e49619bc",
+        "bytes": 2376
+      },
+      "docs/java25-cxxabi-compiler-tls.md": {
+        "sha256": "9f5f09247e386feb10155d19f878644abdf283d9d6c1235fbcabbae182bb928b",
+        "bytes": 1995
+      },
+      "docs/java25-thread-stack-budget.md": {
+        "sha256": "91cd713ae4379549fec8ee569af9f27513f67e87c02934c923ef727ec0bf85ac",
+        "bytes": 1999
+      },
+      "tools/sync_github.py": {
+        "sha256": "548802b4f1009ec19391af5715a01ae4665c14ec470749f29209167f0da64f38",
+        "bytes": 2966
+      }
+    }
+  },
+  "local_artifacts": {
+    "PPSA99874.zip": "e49863174b0979678b6718df6f1ce4275f5ec47403a17255365d4efbc475be92",
+    "bootstrap-symbols.elf": "ec3450c6e3e680c06d45376dd49076c028d028bf992ed81e942046578bcbdc8e",
+    "client174-openal-source-relink.zip": "6576d7f05d1e661eed31836f756f907fd61561e7e9841741b537576e1c08361e"
+  },
+  "physical_status": "173 launcher313blocks/nonzero76876/peak32766 reported; no exact174 outcome received",
+  "privacy": "No credentials, raw logs, recordings, console address, game/mod JARs or compiled artifacts in this handoff"
+}
