@@ -120,3 +120,11 @@ route identity, playback/input regression or endurance result is claimed for170.
 If the initial profile fails, preserve its code/result and repair against verified
 API evidence before changing constants. A successful host mock or open call does
 not establish microphone compatibility.
+
+## Local174 follow-up
+
+The173 actual mono capture open fails; its missing stage/code prevents a root-cause
+claim.174 retains confirmed process-lifetime AudioIn initialization across probes
+and opens, retries genuine failed initialization and reports native failure stage/
+code. Native profile constants are unchanged. See [174 evidence and console checks](client-mic-disconnect-174.md).
+Speech, mute, route identity and two-way SVC remain pending.

@@ -1,0 +1,11 @@
+{
+  "source_sha256": {
+    "java25/patches/0135-ps5-socket-preclose-shutdown.patch": "161f0ed61cf60f314e7130bbd566501e0c9f79a2a03c3b2966b7c33a3c4672b2",
+    "tools/test_java25_socket_preclose.py": "1fff9c6cec990a75564bff23534bbf7894731d3f251f3c2753982f9bbf4d0435"
+  },
+  "unix_dispatcher_object_sha256": "31d2cf5f4404f22830ea792fc109598e3c43f5ae6d8cb215915ffefc1cdba2e1",
+  "scope": "PS5 sockets use shutdown(SHUT_RDWR), retain descriptor until existing Java end/tryClose final close; no early close/reuse; ENOTSOCK retains original dup2/error path; no other-platform change",
+  "console": "consumer173 SVC disconnect throws Error caused by UnixDispatcher.preClose0 IOException EPERM; exact174 world disconnect/rejoin/multiplayer/socket lifecycle pending",
+  "repository": "https://github.com/mateo-cogeanu/ps5-java25-homebrew",
+  "commit": "f12c86e"
+}

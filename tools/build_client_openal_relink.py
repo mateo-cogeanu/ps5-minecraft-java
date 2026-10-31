@@ -49,6 +49,14 @@ def build(runtime,output,variant="native_bootstrap",version="01.000.026",tested_
   dest=kit/'consumer-source'/path;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/path,dest)
  export_consumer_bootstrap(kit,variant)
  if variant=='startup':
+  socket_pin=ROOT/'client/ports/socket-preclose-runtime.json'
+  if socket_pin.exists():
+   target=kit/'consumer-source/client/ports/socket-preclose-runtime.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(socket_pin,target)
+   for path,digest in json.loads(socket_pin.read_text())['source_sha256'].items():
+    src=runtime/path;assert sha(src)==digest
+    dest=kit/'runtime-source'/path;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dest)
+   path='src/java.base/unix/native/libnio/ch/UnixDispatcher.c'
+   src=runtime/'.tools/java25/openjdk'/path;dest=kit/'runtime-source/openjdk'/path;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dest)
   pin=ROOT/'client/ports/thread-stack-runtime.json'
   if pin.exists():
    target=kit/'consumer-source/client/ports/thread-stack-runtime.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(pin,target)

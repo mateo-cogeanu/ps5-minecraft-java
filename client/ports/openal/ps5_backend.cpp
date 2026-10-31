@@ -168,12 +168,12 @@ struct Ps5Capture final : BackendBase {
   if(!captureEnabled.load(std::memory_order_acquire)||(!name.empty()&&name!=CaptureName))throw al::backend_exception{al::backend_error::NoDevice,"PS5 microphone capture disabled or unavailable"};
   if(mDevice->mSampleRate!=48000||mDevice->FmtChans!=DevFmtMono||(mDevice->FmtType!=DevFmtFloat&&mDevice->FmtType!=DevFmtShort))throw al::backend_exception{al::backend_error::DeviceError,"PS5 capture requires 48kHz mono float32 or S16"};
   if(!lease.acquire())throw al::backend_exception{al::backend_error::DeviceError,"PS5 microphone is in use or cleanup is pending"};
-  if(!capture.open(captureApi())){lease.release();throw al::backend_exception{al::backend_error::NoDevice,"PS5 system microphone could not open"};}
+  if(!capture.open(captureApi())){std::fprintf(stderr,"PS5 AudioIn stage=%s result=0x%x\n",capture.errorStage,unsigned(capture.error));std::fflush(stderr);lease.release();throw al::backend_exception{al::backend_error::NoDevice,"PS5 microphone {} failed: 0x{:x}",capture.errorStage,unsigned(capture.error)};}
   mDeviceName=CaptureName;mDevice->mBufferSize=ps5audio::Capture::Capacity;
  }
  static void* run(void* opaque) noexcept {
   auto& self=*static_cast<Ps5Capture*>(opaque);
-  while(!self.kill.load(std::memory_order_acquire))if(!capture.pump()){self.mDevice->handleDisconnect("PS5 microphone capture failed");break;}
+  while(!self.kill.load(std::memory_order_acquire))if(!capture.pump()){std::fprintf(stderr,"PS5 AudioIn stage=%s result=0x%x\n",capture.errorStage,unsigned(capture.error));std::fflush(stderr);self.mDevice->handleDisconnect("PS5 microphone capture failed");break;}
   return nullptr;
  }
  void start() override {
@@ -194,7 +194,7 @@ extern "C" __attribute__((visibility("default"))) void client_ps5_capture_enable
 extern "C" __attribute__((visibility("default"))) void client_ps5_capture_probe(char* result,unsigned size){
  if(!result||!size)return;CaptureLease lease;
  if(!lease.acquire()){std::snprintf(result,size,"Microphone busy or previous cleanup failed. Restart the app.");return;}
- if(!capture.open(captureApi())){std::snprintf(result,size,"AudioIn open failed (0x%x). Select your microphone in PS5 settings; capture remains unvalidated.",unsigned(capture.error));return;}
+ if(!capture.open(captureApi())){std::snprintf(result,size,"AudioIn %s failed (0x%x). Select your microphone in PS5 settings; capture remains unvalidated.",capture.errorStage,unsigned(capture.error));return;}
  bool good=true;for(unsigned n=0;n<313;n++)if(!capture.pump()){good=false;break;}
  std::snprintf(result,size,"%s: blocks=%llu nonzero=%llu peak=%d silent-blocks=%llu. System-selected route; DualSense identity and mute need console confirmation. No recording saved.",good?"Input reads completed":"Capture failed",(unsigned long long)capture.blocks,(unsigned long long)capture.nonzero,capture.peak,(unsigned long long)capture.silent_blocks);
  if(!capture.close())std::snprintf(result,size,"Microphone close failed (0x%x). Ownership retained; restart the app.",unsigned(capture.error));
@@ -206,7 +206,10 @@ auto Ps5BackendFactory::querySupport(BackendType type) -> bool {return type==Bac
 auto Ps5BackendFactory::enumerate(BackendType type) -> std::vector<std::string> {
     if(type==BackendType::Playback)return {DeviceName};
     if(type==BackendType::Capture&&captureEnabled.load(std::memory_order_acquire)){
-        CaptureLease probe;if(probe.acquire()&&capture.open(captureApi())&&capture.pump()){probe.release();if(!probe.owned)return {CaptureName};}
+        CaptureLease probe;if(probe.acquire()){
+            if(capture.open(captureApi())&&capture.pump()){probe.release();if(!probe.owned)return {CaptureName};}
+            std::fprintf(stderr,"PS5 AudioIn enumeration stage=%s result=0x%x\n",capture.errorStage,unsigned(capture.error));std::fflush(stderr);
+        }
     }
     return {};
 }

@@ -53,6 +53,13 @@ assert b'PS5 owned Java/compiler stack fallback budget requested64MiB' in elf.re
 assert b'PS5 direct stack exhausted: held=' in elf.read_bytes()
 assert b'PS5 direct stack rejected: available=' in elf.read_bytes()
 
+# The SVC disconnect repair must be in the runtime actually packaged here.
+socket_pin=json.loads((ROOT/'client/ports/socket-preclose-runtime.json').read_text())
+for path,digest in socket_pin['source_sha256'].items():assert sha((runtime/path).read_bytes())==digest
+assert sha((runtime/'.tools/java25/openjdk/build/ps5-bootstrap/support/native/java.base/libnio/UnixDispatcher.o').read_bytes())==socket_pin['unix_dispatcher_object_sha256']
+assert symbols.get('Java_sun_nio_ch_UnixDispatcher_preClose0')
+assert b'socket pre-close shutdown failed' in elf.read_bytes()
+
 # The exact linked exception entrypoints must use compiler TLS, not SDK keys.
 cxxabi_pin=json.loads((ROOT/'build/client-gpu/cxxabi-tls.json').read_text())
 assert cxxabi_pin['object_sha256']==sha((ROOT/'build/client-gpu/cxxabi-tls.o').read_bytes())

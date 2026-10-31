@@ -15,20 +15,24 @@ struct CaptureApi {
 struct Capture {
  static constexpr unsigned Grain=256,InputRate=16000,Rate=48000,Capacity=16384;
  ps5audio::Mutex mutex;CaptureApi api{};int handle=-1,route=-1,error=0;
+ const char* errorStage="none";bool initialized=false;
  bool healthy=false,close_uncertain=false;float previous=0;bool previous_valid=false;
  std::array<float,Capacity> ring{};unsigned read=0,count=0;
  std::uint64_t blocks=0,nonzero=0,silent_blocks=0,dropped=0;int peak=0;
  alignas(64) std::array<std::int16_t,Grain> pcm{};
  bool open(CaptureApi calls){
-  const auto lock=std::lock_guard{mutex};if(handle>=0)return false;api=calls;
-  int user=-1;error=api.initialUser(&user);if(error<0||user<0)return false;
-  error=api.init();if(error<0)return false;
+  const auto lock=std::lock_guard{mutex};if(handle>=0){errorStage="owned-port";return false;}api=calls;
+  int user=-1;errorStage="initial-user";error=api.initialUser(&user);if(error<0||user<0)return false;
+  // AudioIn is process-lifetime. Enumeration/test/open share this owner: once
+  // initialization actually succeeds, do not initialize it again per port.
+  if(!initialized){errorStage="init";error=api.init();if(error<0)return false;initialized=true;}
+  errorStage="open";
   handle=api.open(user,1,0,Grain,InputRate,1); // PS5 General, index0, S16 mono profile.
   if(handle<0){error=handle;return false;}
-  route=api.reroute(handle);if(route<0){error=route;closeLocked();return false;}
-  healthy=true;error=0;read=count=0;previous_valid=false;blocks=nonzero=silent_blocks=dropped=0;peak=0;return true;
+  errorStage="reroute";route=api.reroute(handle);if(route<0){error=route;closeLocked();return false;}
+  healthy=true;error=0;errorStage="none";read=count=0;previous_valid=false;blocks=nonzero=silent_blocks=dropped=0;peak=0;return true;
  }
- bool closeLocked(){if(handle<0)return true;if(close_uncertain)return false;int rc=api.close(handle);if(rc<0){error=rc;healthy=false;close_uncertain=true;return false;}handle=-1;healthy=false;read=count=0;previous_valid=false;return true;}
+ bool closeLocked(){if(handle<0)return true;if(close_uncertain)return false;int rc=api.close(handle);if(rc<0){error=rc;errorStage="close";healthy=false;close_uncertain=true;return false;}handle=-1;healthy=false;read=count=0;previous_valid=false;return true;}
  bool close(){const auto lock=std::lock_guard{mutex};return closeLocked();}
  // One producer. Caller joins it before close. Silence queries before AND after
  // input conservatively discard the complete block during mute/route changes.
@@ -36,7 +40,7 @@ struct Capture {
   if(handle<0||!healthy)return false;int before=api.silent(handle),route_before=api.reroute(handle);
   int result=api.input(handle,pcm.data());int after=api.silent(handle),route_after=api.reroute(handle);
   const auto lock=std::lock_guard{mutex};
-  if(result!=int(Grain)||before<0||after<0||route_before<0||route_after<0){error=result<0?result:before<0?before:after<0?after:route_before<0?route_before:route_after<0?route_after:-1;healthy=false;read=count=0;return false;}
+  if(result!=int(Grain)||before<0||after<0||route_before<0||route_after<0){errorStage=result!=int(Grain)?"input":before<0?"silent-before":after<0?"silent-after":route_before<0?"reroute-before":"reroute-after";error=result<0?result:before<0?before:after<0?after:route_before<0?route_before:route_after<0?route_after:-1;healthy=false;read=count=0;return false;}
   bool silent=before!=0||after!=0||route_before!=route_after||route_after!=route;
   if(route_after!=route){route=route_after;read=count=0;}++blocks;
   if(silent){++silent_blocks;std::fill(pcm.begin(),pcm.end(),0);previous_valid=false;read=count=0;}
