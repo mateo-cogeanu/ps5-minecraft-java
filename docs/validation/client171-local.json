@@ -21,7 +21,12 @@
     "package": "PASS complete startup package audit including actual final compiler-TLS exception entrypoints",
     "relink": "PASS normal and replacement-OpenAL both byte-identical to final ELF; input manifest hashes/sizes and ZIP CRC checked",
     "documentation": "PASS1711 local links",
-    "hosted": "Implementation policy run41202342991: macOS passed; Ubuntu in progress at record creation"
+    "hosted": {
+      "implementation_commit": "112c38e05c28a4c8c0a79207560b2bfc36dfe4af",
+      "url": "https://github.com/mateo-cogeanu/ProsperoCraft/actions/runs/41202342991",
+      "policy (macos-15)": "success",
+      "policy (ubuntu-24.04)": "success"
+    }
   },
   "crash": {
     "observed_build": "01.000.170",
