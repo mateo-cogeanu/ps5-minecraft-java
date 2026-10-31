@@ -49,7 +49,7 @@ fails for another reason.
 
 Fast15/native7 lanes pass, including a portable actual-header test with1000
 context generation reuses,8 concurrent isolated threads,16-context exhaustion
-and reuse while native key setters return ENOMEM, under ASan/UBSan. Two-port
+and reuse with key-set refusal scoped to the tested implementation (sanitizer/runtime keys remain normal), under ASan/UBSan. Two-port
 ownership tests retain/reuse/limit/deduplicate handles with concurrent claims.
 
 The real pinned OpenAL host build tests two independent playback devices plus a

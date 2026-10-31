@@ -5,25 +5,31 @@ import subprocess,tempfile
 from host_toolchain import executable
 ROOT=Path(__file__).resolve().parents[1]
 code=r'''
-#include "ps5_thread_error.hpp"
+#include <array>
+#include <atomic>
+#include <cstdint>
+#include <stdexcept>
+#include <type_traits>
 #include <cassert>
 #include <cerrno>
 #include <thread>
-#include <atomic>
 #include <memory>
-extern "C" int pthread_setspecific(pthread_key_t,const void*)
-#ifdef __linux__
- noexcept
-#endif
- {return ENOMEM;}
+static std::atomic<unsigned> key_sets{0};
+static int refused_key_set(pthread_key_t,const void*) noexcept {++key_sets;return ENOMEM;}
+// Restrict refusal to this implementation. ASan/libstdc++ own native keys must
+// keep working; global interposition prevents Linux ASan from initializing.
+#define pthread_setspecific refused_key_set
+#include "ps5_thread_error.hpp"
+#undef pthread_setspecific
 using Error=ps5audio::ThreadError<int>;
 int main(){
+ assert(refused_key_set(pthread_key_t{},nullptr)==ENOMEM);key_sets=0;
  for(int n=0;n<1000;++n){Error a(0),b(0);assert(!a.get()&&!b.get());a.set(7);assert(a.get()==7&&!b.get());}
  Error a(0),b(0);a.set(9);std::atomic<unsigned> ready{0};std::thread threads[8];
  for(unsigned i=0;i<8;++i)threads[i]=std::thread([&,i]{assert(!a.get()&&!b.get());a.set(i+1);b.set(i+11);++ready;while(ready<8)std::this_thread::yield();assert(a.get()==int(i+1)&&b.get()==int(i+11));});
  for(auto&t:threads)t.join();assert(a.get()==9&&!b.get());
  std::unique_ptr<Error> slots[14];for(auto&v:slots)v=std::make_unique<Error>(0);bool refused=false;try{Error overflow(0);}catch(const std::runtime_error&){refused=true;}assert(refused);
- slots[3].reset();slots[3]=std::make_unique<Error>(0);assert(!slots[3]->get());
+ slots[3].reset();slots[3]=std::make_unique<Error>(0);assert(!slots[3]->get());assert(key_sets==0);
  ps5audio::PortPool *unused=nullptr;(void)unused;
 }
 '''.replace(' ps5audio::PortPool *unused=nullptr;(void)unused;','')
