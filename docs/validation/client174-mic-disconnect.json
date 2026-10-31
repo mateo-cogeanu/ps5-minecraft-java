@@ -1,0 +1,26 @@
+{
+  "app_version": "01.000.174",
+  "source_commit": "42b397cd12f5f25464e3967cd85a16c1c4bceb8c",
+  "runtime_commit": "f12c86e",
+  "artifacts": {
+    "PPSA99874.zip": "e49863174b0979678b6718df6f1ce4275f5ec47403a17255365d4efbc475be92",
+    "bootstrap-symbols.elf": "ec3450c6e3e680c06d45376dd49076c028d028bf992ed81e942046578bcbdc8e",
+    "client174-openal-source-relink.zip": "6576d7f05d1e661eed31836f756f907fd61561e7e9841741b537576e1c08361e"
+  },
+  "tests": {
+    "launcher": "PASS15 local; initial duplicate timed out once, focused and full retry pass",
+    "native": "PASS7 local ASan/UBSan",
+    "runtime": "PASS actual UnixDispatcher JNI blocked UDP/TCP/accept close x40 each, errors/desktop/non-socket controls; PS5 java.base libraries rebuild",
+    "openal": "PASS actual playback two devices/loopback x20 and capture x20; a second init is forced to refuse, enumeration+all capture cycles succeed with exactly one confirmed init; host OS source only",
+    "startup_host": "PASS launch policy, CPU snapshot, observer",
+    "package": "PASS package/CRC/signature/runtime object pin/linked0135entry/native import audit/frozen package hashes",
+    "relink": "PASS unmodified and replacement OpenAL both exactly match symbols SHA256",
+    "hosted_policy": "PASS Linux/macOS https://github.com/mateo-cogeanu/ProsperoCraft/actions/runs/41210898073",
+    "hosted_native": "PASS Linux/macOS https://github.com/mateo-cogeanu/ProsperoCraft/actions/runs/41210954543"
+  },
+  "console": {
+    "173_microphone_test": "User reports313blocks,76876nonzero,peak32766; speech correlation/mute/SVC not established",
+    "174": "PENDING microphone enumeration/SVC speech/mute/route, return-to-title/rejoin/save, playback/input/endurance"
+  },
+  "publication": "Source only; no release/prerelease/Store"
+}

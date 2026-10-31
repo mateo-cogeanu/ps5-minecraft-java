@@ -1,0 +1,23 @@
+{
+  "source": "Accepted167 recovery ELF; exact DT_NEEDED extracted with llvm-readelf; no binary needed by future package checks",
+  "app_version": "01.000.167",
+  "symbols_sha256": "5f0fc1b8ad448e04115f97d3979a07a6957ef79524c56aa2c80d103a436f43c7",
+  "needed": [
+    "libSceAgc.prx",
+    "libSceAgcDriver.prx",
+    "libSceAudioOut.sprx",
+    "libSceKeyboard.sprx",
+    "libSceLibcInternal.sprx",
+    "libSceMouse.sprx",
+    "libSceNet.sprx",
+    "libScePad.sprx",
+    "libSceSysmodule.sprx",
+    "libSceSystemService.sprx",
+    "libSceUserService.sprx",
+    "libSceVideoOut.sprx",
+    "libkernel.sprx"
+  ],
+  "permitted_additions": [
+    "libSceAudioIn.sprx"
+  ]
+}

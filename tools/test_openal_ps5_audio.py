@@ -26,7 +26,9 @@ extern "C" int test_audio_attempts(){return open_attempts;}
 extern "C" int sceKernelUsleep(unsigned usec){assert(usec==50000);++waits;return mode==9?-44:0;}
 extern "C" double test_audio_balance(){return double(left.load())/double(right.load());}
 extern "C" int sceUserServiceGetInitialUser(int* u){*u=1;return 0;}
-extern "C" int sceAudioInInit(){return 0;}
+static std::atomic<int> capture_inits{0};
+extern "C" int test_capture_inits(){return capture_inits;}
+extern "C" int sceAudioInInit(){return ++capture_inits==1?0:-73;} // second init refuses; not a PS5 error-code claim
 extern "C" int sceAudioInOpen(int,unsigned,unsigned,unsigned,unsigned,unsigned){return mode==100?31:-99;}
 extern "C" int sceAudioInInput(int h,void* out){assert(h==31);auto* p=static_cast<std::int16_t*>(out);for(int i=0;i<256;i++)p[i]=i%2?12000:-12000;usleep(16000);return 256;}
 extern "C" int sceAudioInClose(int){return 0;}
@@ -44,6 +46,7 @@ subprocess.run(['clang++','-std=c++17','-fsanitize=address,undefined','-fPIC','-
 library,audit=build(host=True,speakers=True,host_objects=[w/'sink.o'])
 subprocess.run(['install_name_tool','-id',str(library),str(library)],check=True)
 (w/'driver.cpp').write_text(r'''
+extern "C" int test_capture_inits();
 #define AL_ALEXT_PROTOTYPES
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -93,7 +96,7 @@ int main(int argc,char**argv){assert(client_ps5_audio_event_preinit()==0);assert
    float samples[768];alcCaptureSamples(capture,samples,768);assert(alcGetError(capture)==ALC_NO_ERROR);bool nonzero=false;for(float x:samples){assert(std::isfinite(x)&&x>=-1&&x<=1);nonzero|=x!=0;}assert(nonzero);
    alcCaptureStop(capture);assert(alcCaptureCloseDevice(capture));
   }
-  client_ps5_capture_enable(0);assert(!alcCaptureOpenDevice(nullptr,48000,AL_FORMAT_MONO_FLOAT32,4096));puts("PASS real OpenAL capture path default-off/enable/enumerate/open/start/available/float samples/stop/close x20; host AudioIn source only");return 0;
+  assert(test_capture_inits()==1);client_ps5_capture_enable(0);assert(!alcCaptureOpenDevice(nullptr,48000,AL_FORMAT_MONO_FLOAT32,4096));puts("PASS real OpenAL capture path default-off/enable/enumerate/open/start/available/float samples/stop/close x20 with one confirmed init despite repeated-init refusal; host AudioIn source only");return 0;
  }
  for(int cycle=0;cycle<(mode==3?1:3);++cycle){
   ALCdevice*d=alcOpenDevice("PS5 Speakers");

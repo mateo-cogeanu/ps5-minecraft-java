@@ -11,8 +11,11 @@ OpenAL opens a real second playback device and its context; the microphone reque
 is now the expected48kHz mono Float32. Both actual capture opens fail before a
 capture worker is created. The Java sound fallback has no PS5 capture provider.
 The old log omits the native AudioIn stage/code, so neither the failing call nor
-its underlying reason is established. The launcher five-second input test can
-report the error code; speech/mute/route/two-way voice remain unvalidated.
+its underlying reason is established. The user subsequently reports the173 launcher test returned313blocks,
+76876nonzero samples and peak32766. This establishes a completed read with
+nonzero PCM in that test, not speech correlation or mute/two-way SVC acceptance.
+It supports keeping the current native format; the exact earlier failing call
+remains unknown. Speech/mute/route/two-way voice remain unvalidated.
 
 Returning to title invokes SVC's DatagramSocket.close. It throws java.lang.Error
 wrapping IOException "Operation not permitted" from UnixDispatcher.preClose0.
@@ -49,7 +52,12 @@ kernels do not establish PS5 shutdown wakeup behavior.
 The capture host fixture verifies failed-init retry and one confirmed init across
 failed/successful opens and200restarts, alongside existing bounds/mute/route/
 conversion/concurrency controls. Host fixtures do not establish microphone speech.
-Build/package/relink results and checksums are recorded after local verification.
+Local fast15/native7, the real OpenAL playback/capture lifecycle (including
+forced repeated-init refusal), startup host, package and both exact relink paths
+pass. Linux/macOS policy and native Actions pass on the implementation commit.
+The first local fast run timed out in duplicate once; focused and full retries
+pass. [Validation and artifact checksums](validation/client174-mic-disconnect.json)
+record these results separately from physical-console acceptance.
 
 On174, test the microphone from Instance Settings → Microphone, then enable voice
 capture and try SVC. Record the exact stage/code on failure. On success establish
@@ -58,3 +66,8 @@ participant. Return to title while voice receive is active, re-enter the same
 world repeatedly, check saved state and repeat server joins. Also check game and
 voice output, controller/haptics and sustained terrain loading. Exact174 console
 acceptance is pending; no successful voice or world-exit result is claimed.
+
+The package audit now compares native dependencies with a small recorded list
+extracted from the SHA-verified accepted167 recovery ELF, plus only AudioIn. It
+no longer requires the obsolete153 local binary removed by the authorized disk
+cleanup. No historical binary is recreated and the dependency check remains exact.

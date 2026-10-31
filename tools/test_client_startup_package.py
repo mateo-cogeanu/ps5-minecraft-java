@@ -319,9 +319,11 @@ with zipfile.ZipFile(package)as z,zipfile.ZipFile(ROOT/'dist/milestones/Client_C
  refs=subprocess.check_output([str(LLVM/'llvm-nm'),'--undefined-only',str(work/'main.o')],text=True)
  assert 'sceKernelGetHwModelName' not in refs and 'sceKernelGetHwSerialNumber' not in refs and 'sceKernelGetMainSocId' in refs
  dynamic=subprocess.check_output([str(LLVM/'llvm-readelf'),'-d',str(elf)],text=True);assert 'libkernel_sys.sprx' not in dynamic
- baseline_dynamic=subprocess.check_output([str(LLVM/'llvm-readelf'),'-d',str(ROOT/'dist/candidates/ProsperoCraft-01.000.153/bootstrap-symbols.elf')],text=True)
+ dependency_baseline=json.loads((ROOT/'tests/fixtures/native-needed-libraries.json').read_text())
+ assert dependency_baseline['symbols_sha256']=='5f0fc1b8ad448e04115f97d3979a07a6957ef79524c56aa2c80d103a436f43c7'
+ assert dependency_baseline['permitted_additions']==['libSceAudioIn.sprx']
  needed=lambda text:{line.split('[')[1].split(']')[0]for line in text.splitlines()if '(NEEDED)' in line}
- assert needed(dynamic)==needed(baseline_dynamic)|{'libSceAudioIn.sprx'},'Only the explicit170AudioIn dependency may extend153; hardware presentation adds none'
+ assert needed(dynamic)==set(dependency_baseline['needed'])|set(dependency_baseline['permitted_additions']),'Only explicit AudioIn may extend the recorded accepted167 native dependencies'
  assert all(name in imports for name in ['sceAudioInInit','sceAudioInOpen','sceAudioInInput','sceAudioInClose','sceAudioInGetSilentState','sceAudioInGetRerouteCount'])
  for name in ['Java_ProsperoMicrophone_nativeEnable','Java_ProsperoMicrophone_nativeProbe']:assert symbols.get(name),name
  undefined=subprocess.check_output([str(LLVM/'llvm-nm'),'--undefined-only',str(elf)],text=True)
@@ -525,7 +527,7 @@ with (ROOT/'dist/accepted/Client_Auth_Errors-01.000.078/PPSA99874-full-local.zip
 
 with (ROOT/'dist/accepted/Client_Instances-01.000.079/PPSA99874-full-local.zip').open('rb')as stream:assert hashlib.file_digest(stream,'sha256').hexdigest()=='ee4238389de4c454d7b19173fa2613a4515d9c6e685ee083e3e70772b3deb6bf'
 
-print(f'PASS{APP_VERSION} actual package/CRC/signatures,launcher-only dependencies/zero bundled game JARs or asset objects,exact0126coreimage/rebuilt0125libnio+0130libnet/unchanged023otherlibrarybytes except verifiedGNUbuildIDs plus rebuilt0134HotSpot,359+4+4+14+1staged constructors/19real resident groups/actual036 SPIRV-Cross+139 custom-lock VMA+033 FreeType+031 STB+029 OSMesa/OpenGL+026 libffi+OpenAL+module overlay/paired C++ allocator/actual Main invocation bytecode/workdir/log config and preserved022/023 packages. Menu confirmation recorded separately;gameplay/stability validation pending. SHA256',sha(package.read_bytes()))
+print(f'PASS{APP_VERSION} actual package/CRC/signatures,launcher-only dependencies/zero bundled game JARs or asset objects,exact0126coreimage/rebuilt0135libnio+0130libnet/unchanged023otherlibrarybytes except verifiedGNUbuildIDs plus rebuilt0134HotSpot,359+4+4+14+1staged constructors/19real resident groups/actual036 SPIRV-Cross+139 custom-lock VMA+033 FreeType+031 STB+029 OSMesa/OpenGL+026 libffi+OpenAL+module overlay/paired C++ allocator/actual Main invocation bytecode/workdir/log config and preserved022/023 packages. Menu confirmation recorded separately;gameplay/stability validation pending. SHA256',sha(package.read_bytes()))
 
 with (ROOT/'dist/published/ProsperoCraft-01.000.082/PPSA99874.zip').open('rb') as frozen082:
  assert hashlib.file_digest(frozen082,'sha256').hexdigest()=='ab49cad8977736be2be72230743232a270dba9bd17fa70a66b64a93c48230820'
