@@ -1,5 +1,10 @@
 # Changelog
 
+## 01.000.172 — local terrain worker stack budget
+
+- Enable runtime-owned bootstrap64MiB stack fallback budget after171 native trace reaches its32MiB boundary and Sodium/Vitrail worker creation fails. Preserve requested stack sizes,64slots,realnativecreation and joined cleanup; runtime default remains32MiB.
+- Correct the returned-EAGAIN fallback gate and add capacity diagnostics. This gate was not the observed171 cause; underlying native allocator refusal and exact172 world/shader/voice/save validation remain pending. [Evidence and test plan](docs/client-terrain-thread-budget-172.md). No release/Store update.
+
 ## 01.000.171 — local readable pairing and instance layout repair
 
 - Six-character case-insensitive pairing with automatic hyphen and five-minute rotation; short selected-instance `/i` address.

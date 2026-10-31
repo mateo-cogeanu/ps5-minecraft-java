@@ -59,6 +59,7 @@ extern "C" std::uint64_t sceKernelGetProcessTime();
 extern "C" void JNU_PS5SetDirectScratchEnabled(int);
 extern "C" void JNU_PS5SetNetworkScratchEnabled(int);
 extern "C" int JVM_PS5SetExtendedSyncReserveEnabled(int);
+extern "C" int JVM_PS5SetExtendedThreadStackBudgetEnabled(int);
 extern "C" void JNU_PS5SetVerifierSmallReserveEnabled(int);
 extern "C" void ps5_emutls_enable_direct(int);
 extern "C" int prospero_sdl_mutex_preinit();
@@ -575,6 +576,9 @@ int main(int argc,char** argv) {
  log_stage("PS5 compiler TLS direct fallback enabled after libc/anonymous ENOMEM; shared native-data ledger");
  JNU_PS5SetDirectScratchEnabled(1);
  JNU_PS5SetNetworkScratchEnabled(1);
+ const int extended_stack_rc=JVM_PS5SetExtendedThreadStackBudgetEnabled(1);
+ if(extended_stack_rc){log_stage("Extended thread-stack budget rejected beforeJVM");notify("Thread-stack configuration failed; inspect logs.");for(;;)(void)sceKernelUsleep(1000000);}
+ log_stage("PS5 owned Java/compiler stack fallback budget requested64MiB;64slots;requested stack sizes and shared native ledger retained");
  const int extended_sync_rc=JVM_PS5SetExtendedSyncReserveEnabled(1);
  if(extended_sync_rc){log_stage("Extended native synchronization policy rejected beforeJVM");notify("Native synchronization configuration failed; inspect logs.");for(;;)(void)sceKernelUsleep(1000000);}
  log_stage("PS5 extended HotSpot sync reserve requested:8192mutex/8192relative/2048absolute;actual prime counts logged by runtime");

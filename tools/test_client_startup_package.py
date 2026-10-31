@@ -44,6 +44,15 @@ def without_build_id(blob):
  return bytes(result)
 audit_current_identity(package)
 elf=work/f'bootstrap-{APP_VERSION}-symbols.elf';text=subprocess.check_output([str(LLVM/'llvm-nm'),'--defined-only',str(elf)],text=True);symbols={l.split()[-1]:int(l.split()[0],16)for l in text.splitlines()if len(l.split())==3}
+# Require the freshly built runtime stack-fallback owner and trace literals.
+thread_pin=json.loads((ROOT/'client/ports/thread-stack-runtime.json').read_text())
+for path,digest in thread_pin['source_sha256'].items():assert sha((runtime/path).read_bytes())==digest
+assert sha((runtime/'.tools/java25/openjdk/build/ps5-bootstrap/hotspot/variant-server/libjvm/objs/os_bsd.o').read_bytes())==thread_pin['os_bsd_object_sha256']
+assert symbols.get('JVM_PS5SetExtendedThreadStackBudgetEnabled')
+assert b'PS5 owned Java/compiler stack fallback budget requested64MiB' in elf.read_bytes()
+assert b'PS5 direct stack exhausted: held=' in elf.read_bytes()
+assert b'PS5 direct stack rejected: available=' in elf.read_bytes()
+
 # The exact linked exception entrypoints must use compiler TLS, not SDK keys.
 cxxabi_pin=json.loads((ROOT/'build/client-gpu/cxxabi-tls.json').read_text())
 assert cxxabi_pin['object_sha256']==sha((ROOT/'build/client-gpu/cxxabi-tls.o').read_bytes())

@@ -1,0 +1,17 @@
+{
+  "repository": "https://github.com/mateo-cogeanu/ps5-java25-homebrew",
+  "source_sha256": {
+    "java25/patches/0133-pthread-return-stack-fallback.patch": "b8777f872310065980f9c3bf4e13ebf489acf47f8691d7f3be364cfc6e160458",
+    "java25/patches/0134-opt-in-thread-stack-budget.patch": "79b36f3db2dcbb65f307777311fd10436edb81776b9a1f0cee0bd6ca93edb451",
+    "tools/test_java25_thread_stack_gate.py": "98bc96bda41b6241bbebcd56387fbb46b1724667dd13425d0e45c08225d91282",
+    "tools/test_java25_direct_stacks.py": "da79c3d5e876eb0cc6cb92496341f56ff271b6d9de9007d2f08db74f5c45e271"
+  },
+  "os_bsd_object_sha256": "234fd859881c370afd5c602b20e95d393812ee8df1b8577a3d9f56ceaa57a72d",
+  "scope": "Explicit bootstrap64MiB owned-stack budget; runtime default32MiB;64slots/requested sizes/shared256MiBledger/realpthread/cleanup retained. Correct returned EAGAIN gate.",
+  "console": "171native trace shows32MiB live owned stacks and8furthernativeEAGAINattempts.172world/shader/save/voicepending;underlyinglibcrefusalunproven",
+  "patches": [
+    "0133",
+    "0134"
+  ],
+  "commit": "909a639"
+}

@@ -3,7 +3,18 @@
 from pathlib import Path
 import argparse,json,subprocess,shutil,hashlib,zipfile,tarfile,io
 ROOT=Path(__file__).resolve().parents[1]
-def export_consumer_bootstrap(kit,variant):
+def export_consumer_bootstrap(kit,variant)
+ if variant=='startup':
+  pin=ROOT/'client/ports/thread-stack-runtime.json'
+  if pin.exists():
+   target=kit/'consumer-source/client/ports/thread-stack-runtime.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(pin,target)
+   runtime_pin=json.loads(pin.read_text())
+   for path,digest in runtime_pin['source_sha256'].items():
+    src=runtime/path;assert sha(src)==digest
+    dest=kit/'runtime-source'/path;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dest)
+   for path in ['src/hotspot/share/runtime/ps5ThreadStacks.hpp','src/hotspot/os/bsd/os_bsd.cpp']:
+    src=runtime/'.tools/java25/openjdk'/path;dest=kit/'runtime-source/openjdk'/path;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dest)
+:
  # Every local include needed by the thin wrapper travels with corresponding source.
  if variant not in {p.name for p in (ROOT/'client').iterdir() if p.is_dir() and (p/'bootstrap.cpp').is_file()}:raise ValueError('Unknown bootstrap variant')
  shutil.copytree(ROOT/'client/bootstrap',kit/'consumer-source/client/bootstrap',dirs_exist_ok=True)
@@ -48,6 +59,17 @@ def build(runtime,output,variant="native_bootstrap",version="01.000.026",tested_
  for path in ['client/ports/openal/sources.json','client/ports/openal/lifecycle.c','tools/build_openal_native.py']:
   dest=kit/'consumer-source'/path;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/path,dest)
  export_consumer_bootstrap(kit,variant)
+ if variant=='startup':
+  pin=ROOT/'client/ports/thread-stack-runtime.json'
+  if pin.exists():
+   target=kit/'consumer-source/client/ports/thread-stack-runtime.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(pin,target)
+   runtime_pin=json.loads(pin.read_text())
+   for path,digest in runtime_pin['source_sha256'].items():
+    src=runtime/path;assert sha(src)==digest
+    dest=kit/'runtime-source'/path;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dest)
+   for path in ['src/hotspot/share/runtime/ps5ThreadStacks.hpp','src/hotspot/os/bsd/os_bsd.cpp']:
+    src=runtime/'.tools/java25/openjdk'/path;dest=kit/'runtime-source/openjdk'/path;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,dest)
+
  # Include the exact build-time target headers for rebuilding the LGPL library.
  with tarfile.open(kit/'ps5-sdk-headers.tar','w')as tar:tar.add(ROOT/'.tools/graphics-sdk/target/include',arcname='target/include')
  if variant=='startup':
