@@ -10,7 +10,7 @@ inline unsigned pointer_command(int page,int kind,int target,bool click){return 
 struct DesktopHit {int kind=-1,target=0;};
 inline DesktopHit desktop_hit(int page,int x,int y,int first,int count,int slide=0,bool offline=false,bool installed=false,bool shader=false){
  auto box=[&](int a,int b,int w,int h){return x>=a&&x<a+w&&y>=b&&y<b+h;};
- bool modal=page==6||(page>=7&&page<=11)||page==14;
+ bool modal=page==6||(page>=7&&page<=11)||page==14||page==15||page==16;
  if(!modal){int tx[]={865,1245,1555},tw[]={350,280,280};for(int i=0;i<3;i++)if(box(tx[i],52,tw[i],68))return {0,i};}
  if(page==0){for(int i=0;i<8&&first+i<count;i++)if(box(70+i%4*450,342+i/4*272+slide,420,242))return {1,first+i};}
  if(page==6){for(int i=0;i<40;i++)if(box(80+i%10*176,465+i/10*91,152,73))return {2,i};for(int i=0;i<5;i++)if(box(70+i*360,855,330,76))return {4,i};return {};}
@@ -23,7 +23,8 @@ inline DesktopHit desktop_hit(int page,int x,int y,int first,int count,int slide
  if(page==2){for(int i=0;i<7;i++)if(box(760,300+i*96,1080,86))return {3,i};}
  if(page==3&&box(1140,366,700,76))return {3,0};
  if(page==4){for(int i=0;i<(offline?4:3);i++)if(box(760,505+i*100,1080,76))return {3,i};}
- if(page==5){if(box(760,310,1080,96))return {3,0};if(box(760,420,1080,96))return {3,1};int rows[]={2,3,4,7,5,6};for(int i=0;i<6;i++)if(box(760+i%2*560,535+i/2*95,520,76))return {3,rows[i]};}
+ if(page==16){for(int i=0;i<3;i++)if(box(1000,380+i*110,820,86))return {3,i};return {};}
+ if(page==5){if(box(110,805,530,70))return {3,9};if(box(760,820,1080,76))return {3,8};if(box(760,310,1080,96))return {3,0};if(box(760,420,1080,96))return {3,1};int rows[]={2,3,4,7,5,6};for(int i=0;i<6;i++)if(box(760+i%2*560,535+i/2*95,520,76))return {3,rows[i]};}
  if(page==7){if(box(240,773,330,76))return {3,1};if(box(680,773,430,76))return {3,0};}
  if(page==11){if(box(78,850,330,76))return {3,1};if(box(470,850,610,76))return {3,0};}
  if(page==14){if(box(760,740,520,76))return {3,0};if(box(1320,740,520,76))return {3,1};}
@@ -38,17 +39,17 @@ inline char desktop_char(unsigned k,bool shift,bool caps){
  for(unsigned i=0;i<12;i++)if(k==keys[i])return shift?upper[i]:normal[i];return 0;
 }
 struct DesktopInput {
- struct Keyboard {int handle=-1;bool primed=false,held[256]{},blocked[256]{};int repeat=0;std::uint64_t at=0;};
+ struct Keyboard {int handle=-1;bool connected=false,primed=false,held[256]{},blocked[256]{};int repeat=0;std::uint64_t at=0;};
  struct Mouse {int handle=-1;bool primed=false;unsigned held=0,blocked=0;};
- Keyboard keys[4];Mouse mice[4];float x=960,y=540;bool cursor=false;std::uint64_t retry=0;
+ Keyboard keys[4];Mouse mice[4];float x=960,y=540;bool cursor=false;std::uint64_t retry=0;bool keyboard_available=false;
  void close(){for(auto& k:keys){if(k.handle>=0)prospero_hid_close(0,k.handle);k=Keyboard{};}for(auto& m:mice){if(m.handle>=0)prospero_hid_close(1,m.handle);m=Mouse{};}cursor=false;}
  template<class Emit,class Point>bool poll(std::uint64_t now,Emit emit,Point point){
   bool changed=false;
   if(now>=retry){retry=now+2000;for(int i=0;i<4;i++){if(keys[i].handle<0)keys[i].handle=prospero_hid_open(0,i);if(mice[i].handle<0)mice[i].handle=prospero_hid_open(1,i);}}
   for(auto& k:keys){if(k.handle<0)continue;prospero_keyboard_packet packets[16]{};int n=prospero_hid_read(0,k.handle,packets,16);if(n<0||n>16){prospero_hid_close(0,k.handle);k=Keyboard{};continue;}
-   auto key=[&](int code,unsigned mods,unsigned leds){unsigned b=code==82?0x10:code==81?0x40:code==80?0x80:code==79?0x20:code==41?0x2000:code==58?8:0;if(b)emit(b);else if(code==40||code==88)emit(0x20000000u|1);else if(code==42||code==76)emit(0x20000000u|2);else if(code==43)emit(0x20000000u|((mods&0x22)?4:3));else if(!(mods&0xdd)){char c=desktop_char(code,mods&0x22,leds&2);if(c)emit(0x30000000u|unsigned(c));}};
+   auto key=[&](int code,unsigned mods,unsigned leds){unsigned b=code==82?0x10:code==81?0x40:code==80?0x80:code==79?0x20:code==41?0x2000:code==58?8:0;if(b)emit(0x50000000u|b);else if(code==40||code==88)emit(0x20000000u|1);else if(code==42||code==76)emit(0x20000000u|2);else if(code==43)emit(0x20000000u|((mods&0x22)?4:3));else if(!(mods&0xdd)){char c=desktop_char(code,mods&0x22,leds&2);if(c)emit(0x30000000u|unsigned(c));}};
    unsigned mods=0,leds=0;
-   for(int i=0;i<n;i++){auto& p=packets[i];bool held[256]{};mods=p.modifiers;leds=p.leds;if(p.connected&&!p.intercepted)for(auto code:p.keys)if(code>=4&&code<224)held[code]=true;
+   for(int i=0;i<n;i++){auto& p=packets[i];k.connected=p.connected&&!p.intercepted;bool held[256]{};mods=p.modifiers;leds=p.leds;if(p.connected&&!p.intercepted)for(auto code:p.keys)if(code>=4&&code<224)held[code]=true;
     if(!k.primed){for(int j=0;j<256;j++)k.blocked[j]=held[j];k.primed=true;}
     for(int j=4;j<224;j++){k.blocked[j]&=held[j];held[j]&=!k.blocked[j];if(held[j]&&!k.held[j]){key(j,mods,leds);k.repeat=j;k.at=now+450;changed=true;}k.held[j]=held[j];}
     if(!p.connected||p.intercepted){k.primed=false;k.repeat=0;}
@@ -56,9 +57,10 @@ struct DesktopInput {
    // Repeat only on a fresh packet: no stale held action after read loss.
    if(n&&k.repeat&&k.held[k.repeat]&&now>=k.at){int c=k.repeat;if(c!=40&&c!=88&&c!=41&&c!=58&&c!=43){key(c,mods,leds);changed=true;}k.at=now+55;}
   }
+  bool available=false;for(auto& k:keys)available|=k.connected;if(keyboard_available&&!available)emit(0x40000002u);keyboard_available=available;
   for(auto& m:mice){if(m.handle<0)continue;prospero_mouse_packet packets[16]{};int n=prospero_hid_read(1,m.handle,packets,16);if(n<0||n>16){prospero_hid_close(1,m.handle);m=Mouse{};continue;}
    for(int i=0;i<n;i++){auto& p=packets[i];if(!p.connected){m.primed=false;m.held=0;continue;}unsigned b=p.buttons&3;if(!m.primed){m.blocked=b;m.primed=true;}m.blocked&=b;b&=~m.blocked;
-    if(p.x||p.y||b!=m.held||p.wheel){x=std::clamp(x+p.x,0.f,1919.f);y=std::clamp(y+p.y,0.f,1079.f);cursor=true;changed=true;point(int(x),int(y),(b&1)&&!(m.held&1));if((b&2)&&!(m.held&2))emit(0x2000);if(p.wheel)emit(p.wheel>0?0x10:0x40);}m.held=b;
+    if(p.x||p.y||b!=m.held||p.wheel){x=std::clamp(x+p.x,0.f,1919.f);y=std::clamp(y+p.y,0.f,1079.f);cursor=true;changed=true;if(b!=m.held||p.wheel)emit(0x40000001u);point(int(x),int(y),(b&1)&&!(m.held&1));if((b&2)&&!(m.held&2))emit(0x50002000u);if(p.wheel)emit(0x50000000u|(p.wheel>0?0x10:0x40));}m.held=b;
    }
   }return changed;
  }

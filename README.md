@@ -10,6 +10,8 @@ Download Minecraft on your console, keep separate instances for worlds and mods,
 
 ProsperoCraft handles Minecraft installation, accounts, input and game integration. Its [Native Java 25 Runtime](https://github.com/mateo-cogeanu/ps5-java25-homebrew) is maintained separately. Official Minecraft game JARs and asset objects are downloaded and verified from the publisher, rather than bundled with the app.
 
+Local development candidate **01.000.170** adds launcher input switching and a paired local content manager; physical-console checks are pending. An opt-in PS5 AudioIn/OpenAL microphone path and meter need physical-console speech/mute/voice-chat validation. [Test guide](docs/client-local-management-170.md). No170release or Store update.
+
 ## What can I play?
 
 Release **01.000.167** adds supported Minecraft26.2 Fabric, controller/keyboard/mouse handoff fixes, launcher mouse and keyboard controls, and a rounded vector cursor that follows the saved theme. The user accepts this exact build and explicitly requests release. [Release notes](docs/releases/client-input-fabric-167.md) · [Console acceptance](docs/validation/client167-console-acceptance-2026-10-30.json). Broader device coverage and long-session endurance remain unmeasured.

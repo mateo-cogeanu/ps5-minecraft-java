@@ -147,8 +147,12 @@ def finish(runtime,java_home,work,assets,spec,gpu_support,gpu_audit,variant="gpu
   run(LLVM/'clang','-target','x86_64-sie-ps5','-fvisibility-nodllstorageclass=default','-fPIC','-fno-stack-protector','-c',ROOT/'client/ports/sdl/ps5_mouse_imports.c','-o',work/'mouse-imports.o')
   run('/opt/homebrew/opt/lld/bin/ld.lld','-shared','-soname','libSceMouse.sprx',work/'mouse-imports.o','-o',mouse)
   stubs.append(mouse)
+  audioin=work/'libSceAudioIn.so'
+  run(LLVM/'clang','-target','x86_64-sie-ps5','-fvisibility-nodllstorageclass=default','-fPIC','-fno-stack-protector','-c',ROOT/'client/ports/openal/ps5_audioin_imports.c','-o',work/'audioin-imports.o')
+  run('/opt/homebrew/opt/lld/bin/ld.lld','-shared','-soname','libSceAudioIn.sprx',work/'audioin-imports.o','-o',audioin)
+  stubs.append(audioin)
   # Keep after real objects: --as-needed must see their undefined imports.
-  inputs += [str(sdk/'target/lib/libSceKeyboard.so'),str(mouse)]
+  inputs += [str(sdk/'target/lib/libSceKeyboard.so'),str(mouse),str(audioin)]
   response.write_text('\n'.join(json.dumps(p)for p in inputs)+'\n')
  pie=work/('bootstrap-'+version+'-symbols.elf')
  run('bash',sdk/'bin/prospero-lld','-T',layout,'--eh-frame-hdr','--version-script',native/'app-symbols.map','--version-script',aliasmap,'-e','_start','-o',pie,*objects,*stubs,'@'+str(response),'--as-needed',*sorted((sdk/'target/lib').glob('*.so')))

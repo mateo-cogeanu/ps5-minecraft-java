@@ -1,0 +1,90 @@
+{
+  "status": "experimental-native-AudioIn-and-OpenAL-capture-implemented; physical-console-pending",
+  "auto_install": false,
+  "source_repository": "https://github.com/henkelmax/simple-voice-chat",
+  "inspected_source_commit": "2e56198016e02fd99139d37f382b7155c5bd63f5",
+  "source_branch": "26.3 (2.6.28 development; distinct from publisher 2.6.27 artifacts)",
+  "publisher_metadata": [
+    {
+      "modrinth_version_id": "x9jLR94Q",
+      "version": "fabric-2.6.27+26.3",
+      "minecraft": [
+        "26.3"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "published": "2026-10-28T08:54:34.575564Z",
+      "file": {
+        "id": "WMunxTCw",
+        "hashes": {
+          "sha1": "23442735927fe3839650196c0656eb82b0322d87",
+          "sha512": "f2de66761c0f249bb0f9a4b348f98b97ab4e89d3ed3fd37638420364b7431b757933aa08c0cc3e7ba3dd85a602d6c2de313c2309fc587e93cabf31fc5f6df27e"
+        },
+        "url": "https://cdn.modrinth.com/data/9eGKb6K1/versions/x9jLR94Q/voicechat-fabric-2.6.27%2B26.3.jar",
+        "filename": "voicechat-fabric-2.6.27+26.3.jar",
+        "primary": true,
+        "size": 5611159,
+        "file_type": null
+      },
+      "fabric_dependencies": {
+        "fabricloader": ">=0.19.3",
+        "minecraft": "26.3.x",
+        "java": ">=25"
+      },
+      "license": "All Rights Reserved"
+    },
+    {
+      "modrinth_version_id": "ul3tRpKz",
+      "version": "fabric-2.6.27+26.2",
+      "minecraft": [
+        "26.2"
+      ],
+      "loaders": [
+        "fabric"
+      ],
+      "published": "2026-10-28T08:48:41.080771Z",
+      "file": {
+        "id": "hCi1t1Wv",
+        "hashes": {
+          "sha512": "d3c0d7c57138457a16af6dff8e15cd664471647e7697f66a53b62b953b9c778af217170a3284b0b606d1ec4dbfb74936fd95b23469d90fd5afa4c1db82e5b6d7",
+          "sha1": "42f718b4f2c4b05a7c3b6b4eaa51a49d043d9740"
+        },
+        "url": "https://cdn.modrinth.com/data/9eGKb6K1/versions/ul3tRpKz/voicechat-fabric-2.6.27%2B26.2.jar",
+        "filename": "voicechat-fabric-2.6.27+26.2.jar",
+        "primary": true,
+        "size": 5595129,
+        "file_type": null
+      },
+      "fabric_dependencies": {
+        "fabricloader": ">=0.19.3",
+        "minecraft": "26.2.x",
+        "java": ">=25"
+      },
+      "license": "All Rights Reserved"
+    }
+  ],
+  "api_evidence": {
+    "ps5_header": {
+      "url": "https://raw.githubusercontent.com/boykopovar/AnyPS5/b8f0a6b2025605b78eb70646bda79f458a577c82/core/libs/prx/libSceAudioIn/include/AudioIn.hpp",
+      "sha256": "caf998f921aa04887273ad00d0461661ec9270075cacc524ece6f0751b080276"
+    },
+    "ps5_impl": {
+      "url": "https://raw.githubusercontent.com/boykopovar/AnyPS5/b8f0a6b2025605b78eb70646bda79f458a577c82/core/libs/prx/libSceAudioIn/Export.cpp",
+      "sha256": "27a24f7668c76c25497826b18171689f7aa88d690520b462a7624e168f90b640"
+    },
+    "ps5_exports": {
+      "url": "https://raw.githubusercontent.com/DNNDHH/PS5-3.20_Libs/main/libSceAudioIn.c",
+      "sha256": "c7c9717275aa58aab784b534f3f43c4b9c139ffb991dd674fd3c5dc9c7b02810"
+    }
+  },
+  "profile": {
+    "open": "initial user,General1,index0,256frames,16000Hz,param1 (PS5 S16 mono profile)",
+    "capture": "48kHz mono float32/S16;16to48k linear interpolation",
+    "route": "system-selected;choose DualSense in PS5 settings;no automatic embedded/headset identity claim",
+    "mute": "read-only silent-state before/after each block;nonzero/failure/route-change silences or disconnects;no setters",
+    "default_enabled": false,
+    "imports": "libSceAudioIn resident;no system module binary shipped",
+    "console": "pending exact170sample-count/format/non-silent speech/mute/endurance; emulator declarations are not PS5 runtime proof"
+  }
+}

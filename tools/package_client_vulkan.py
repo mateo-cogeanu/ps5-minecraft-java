@@ -50,6 +50,11 @@ assets=work/'assets';shutil.rmtree(assets,ignore_errors=True)
 java=assets/'java25';java.mkdir(parents=True)
 shutil.copytree(ROOT/'build/client',java/'client')
 if args.startup:
+ shutil.copyfile(ROOT/'client/launcher/QR-LICENSE.txt',java/'QR-LICENSE.txt')
+ shutil.copyfile(ROOT/'client/launcher/qr-source.json',java/'qr-source.json')
+ icon_source=java/'launcher-icon-source';icon_source.mkdir()
+ for icon in (ROOT/'assets/launcher-icons').iterdir():
+  if icon.suffix in ('.svg','.json','.txt'):shutil.copy2(icon,icon_source/icon.name)
  from prepare_launcher_branding import prepare as prepare_branding
  prepare_branding()
  shutil.copyfile(ROOT/'client/startup/log4j2-startup.xml',java/'log4j2-startup.xml')
@@ -238,6 +243,10 @@ if args.native_bootstrap:
   subprocess.run(['/opt/homebrew/opt/llvm/bin/clang','-target','x86_64-sie-ps5','-O2','-fPIC','-fvisibility-nodllstorageclass=default','-isysroot',str(ROOT/'.tools/graphics-sdk'),'-c',str(ROOT/'client/startup/openal_trace_env.c'),'-o',str(trace_env)],check=True)
   al_objects=[str(traced),str(al_lifecycle),str(trace_env)]
   al_audit['startup_trace']={'scope':'Startup-private trace3,explicit local-data fallback and real PS5 speaker backend default;nonempty driver/localpath overrides honored,globalgetenv unchanged','source_sha256':hashlib.sha256((ROOT/'client/startup/openal_trace_env.c').read_bytes()).hexdigest(),'private_object_sha256':hashlib.sha256(traced.read_bytes()).hexdigest(),'shim_object_sha256':hashlib.sha256(trace_env.read_bytes()).hexdigest(),'original_object_sha256':hashlib.sha256(al_object.read_bytes()).hexdigest(),'output':'existing native-stderr.log;native trace timing/coverage pending PS5','backend_selection_changed':True,'default_backend':'ps5/PS5 Speakers','local_data_directory_default':'/download0/mc-client','explicit_local_path_honored':True}
+ if args.startup:
+  mic=work/'microphone-jni.o';headers=runtime/'.tools/java25/openjdk/build/ps5-bootstrap/support/modules_include/java.base'
+  subprocess.run(['/opt/homebrew/opt/llvm/bin/clang','-target','x86_64-sie-ps5','-O2','-fPIC','-fvisibility-nodllstorageclass=default','-isysroot',str(ROOT/'.tools/graphics-sdk'),'-I'+str(headers),'-I'+str(headers/'freebsd'),'-c',str(ROOT/'client/ports/openal/microphone_jni.c'),'-o',str(mic)],check=True)
+  al_objects.append(str(mic))
  spec['resident_libraries'].append({'name':'ps5openal','objects':al_objects});(java/'openal-audit.json').write_text(json.dumps(al_audit,indent=2)+'\n')
  helper=work/'callback-helper-raw.o';headers=runtime/'.tools/java25/openjdk/build/ps5-bootstrap/support/modules_include/java.base'
  subprocess.run(['/opt/homebrew/opt/llvm/bin/clang','-target','x86_64-sie-ps5','-O2','-fPIC','-fvisibility-nodllstorageclass=default','-isysroot',str(ROOT/'.tools/graphics-sdk'),'-I'+str(headers),'-I'+str(headers/'freebsd'),'-c',str(ROOT/'client/native_bootstrap/callback_probe.c'),'-o',str(helper)],check=True)

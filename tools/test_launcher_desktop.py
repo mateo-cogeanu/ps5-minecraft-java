@@ -18,11 +18,14 @@ public class DesktopCheck {
   ok(m.tick(0)[35].equals("READY"));m.tick(click(0,1,0));ok(m.tick(0)[11].equals("4"));ok(m.tick(0)[69].equals("SUPPORTED"));ok(!m.tick(0)[6].contains("DEV"));
   m.tick(click(0,3,1));ok(m.tick(0)[11].equals("4")); // stale click ignored
   m.tick(click(4,3,1));ok(m.tick(0)[11].equals("5"));m.tick(click(5,3,0));ok(m.tick(0)[11].equals("6"));
-  set(m,"keyboard","");m.tick(0x30000000|'A');m.tick(0x30000000|'z');m.tick(0x30000000|' ');ok(m.tick(0)[29].equals("Az "));m.tick(0x20000002);ok(m.tick(0)[29].equals("Az"));
+  set(m,"keyboard","");m.tick(0x30000000|'A');m.tick(0x30000000|'z');m.tick(0x30000000|' ');ok(m.tick(0)[29].equals("Az "));ok(m.tick(0)[105].equals("PHYSICAL"));
+  String unfinished=m.tick(0)[29];for(int n=0;n<4;n++){m.tick(0x20);ok(m.tick(0)[105].equals("CONTROLLER"));ok(m.tick(0)[29].equals(unfinished));m.tick(0x40000001);ok(m.tick(0)[105].equals("PHYSICAL"));ok(m.tick(0)[29].equals(unfinished));}m.tick(0x40000002);ok(m.tick(0)[105].equals("CONTROLLER"));m.tick(0x40000001);m.tick(0x50000020);ok(m.tick(0)[105].equals("PHYSICAL"));m.tick(0x20000002);ok(m.tick(0)[29].equals("Az"));
   m.tick(0x2000);ok(m.tick(0)[11].equals("5"));ok(Files.readString(root.resolve("library.json")).equals(saved));
   m.tick(click(5,0,1));ok(m.tick(0)[11].equals("2"));m.tick(click(2,3,6));ok(m.tick(0)[11].equals("10"));m.tick(click(10,3,2));ok(m.tick(0)[11].equals("2"));ok(m.tick(0)[104].equals("2"));
   set(m,"page",9);set(m,"row",0);set(m,"detail",item);m.tick(click(9,0,1));ok(m.tick(0)[11].equals("9"));m.tick(click(9,3,0));ok(m.tick(0)[11].equals("5")); // modal blocks tabs, explicit No
   set(m,"page",6);set(m,"keyboard","");m.tick(0x30000000|'x');m.tick(click(6,4,4)&~0x8000);ok(m.tick(0)[11].equals("6"));m.tick(0x20000001);ok(m.tick(0)[11].equals("5"));ok(m.tick(0)[16].equals("x"));
+  set(m,"page",6);set(m,"keyboardReturn",12);set(m,"keyboard","query");m.tick(0x30000000|'x');ok(m.tick(0)[106].equals("Search content"));m.tick(0x20);ok(m.tick(0)[29].equals("queryx"));m.tick(0x2000);ok(m.tick(0)[11].equals("12"));
+  set(m,"page",6);set(m,"keyboardReturn",1);set(m,"keyboard","x".repeat(40));m.tick(0x30000000|'A');ok(m.tick(0)[29].length()==40);m.tick(0x20000002);ok(m.tick(0)[29].length()==39);m.tick(0x20000001);ok(m.tick(0)[11].equals("1"));
   System.out.println("PASS supported Fabric26.2; real model pointer/tab/dropdown/modal/stale click; typing/backspace/commit/cancel; library preservation");
  }
 }
@@ -44,11 +47,13 @@ int main(){
  assert(desktop_hit(0,70,342,0,2).target==0);assert(desktop_hit(0,69,342,0,2).kind==-1);assert(desktop_hit(0,520,342,0,2).target==1);assert(desktop_hit(0,491,342,0,2).kind==-1);
  assert(desktop_hit(6,900,70,0,0).kind==-1);assert(desktop_hit(10,300,285,8,20).target==8);assert(desktop_hit(5,1350,650,0,0).target==7);assert(desktop_hit(12,1600,550,0,1,0,false,true).target==20);
  assert(desktop_char(4,false,false)=='a'&&desktop_char(4,true,false)=='A'&&desktop_char(4,true,true)=='a');
- DesktopInput d;std::vector<unsigned> events;int clicks=0;auto emit=[&](unsigned x){events.push_back(x);};auto point=[&](int x,int y,bool c){assert(x>=0&&x<1920&&y>=0&&y<1080);clicks+=c;};
+ DesktopInput d;std::vector<unsigned> events,modes;int clicks=0;auto emit=[&](unsigned x){if((x>>28)==4)modes.push_back(x);else events.push_back(x);};auto point=[&](int x,int y,bool c){assert(x>=0&&x<1920&&y>=0&&y<1080);clicks+=c;};
  prospero_keyboard_packet k{};k.connected=1;k.keys[0]=40;kp={k};d.poll(1,emit,point);assert(events.empty()); // held on entry
  k.keys[0]=0;kp={k};d.poll(2,emit,point);k.keys[0]=4;kp={k};d.poll(3,emit,point);assert(events.back()==(0x30000000|'a'));size_t n=events.size();d.poll(500,emit,point);assert(events.size()==n); // no stale repeat
  kp={k};d.poll(501,emit,point);assert(events.size()==n+1);k.intercepted=1;kp={k};d.poll(502,emit,point);k.intercepted=0;kp={k};d.poll(503,emit,point);assert(events.size()==n+1); // rearm after intercept
- prospero_mouse_packet m{};m.connected=1;m.buttons=1;mp={m};d.poll(504,emit,point);assert(clicks==0);m.buttons=0;mp={m};d.poll(505,emit,point);m.buttons=1;m.x=50000;m.y=-50000;mp={m};d.poll(506,emit,point);assert(clicks==1&&d.x==1919&&d.y==0&&d.cursor);mp={m};d.poll(507,emit,point);assert(clicks==1);d.close();assert(closes==2&&!d.cursor);
+ prospero_mouse_packet m{};m.connected=1;m.buttons=1;mp={m};d.poll(504,emit,point);assert(clicks==0);m.buttons=0;mp={m};d.poll(505,emit,point);m.buttons=1;m.x=50000;m.y=-50000;mp={m};d.poll(506,emit,point);assert(clicks==1&&d.x==1919&&d.y==0&&d.cursor);mp={m};d.poll(507,emit,point);assert(clicks==1);size_t mode_count=modes.size();m.buttons=1;m.x=1;m.y=0;mp={m};d.poll(508,emit,point);assert(modes.size()==mode_count); // motion never steals the edit mode
+ k.connected=0;kp={k};d.poll(509,emit,point);assert(modes.back()==0x40000002u); // last keyboard disconnect
+ d.close();assert(closes==2&&!d.cursor);
 }
 '''
 with tempfile.TemporaryDirectory() as td:

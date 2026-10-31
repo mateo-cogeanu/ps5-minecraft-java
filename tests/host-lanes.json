@@ -13,13 +13,15 @@
     "test_fabric_dependencies.py",
     "test_launcher_offline.py",
     "test_launcher_delete.py",
-    "test_launcher_duplicate.py"
+    "test_launcher_duplicate.py",
+    "test_launcher_web.py"
   ],
   "native": [
     "test_audio_native_mutex.py",
     "test_audio_port_retention.py",
     "test_openal_mixer_workers.py",
     "test_launcher_desktop.py",
-    "test_client_library.py"
+    "test_client_library.py",
+    "test_microphone_capture.py"
   ]
 }

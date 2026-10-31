@@ -8,6 +8,7 @@ def export_consumer_bootstrap(kit,variant):
  if variant not in {p.name for p in (ROOT/'client').iterdir() if p.is_dir() and (p/'bootstrap.cpp').is_file()}:raise ValueError('Unknown bootstrap variant')
  shutil.copytree(ROOT/'client/bootstrap',kit/'consumer-source/client/bootstrap',dirs_exist_ok=True)
  shutil.copytree(ROOT/'client'/variant,kit/'consumer-source/client'/variant,dirs_exist_ok=True)
+ if variant=='startup':shutil.copytree(ROOT/'client/launcher',kit/'consumer-source/client/launcher',dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
 
 def build(runtime,output,variant="native_bootstrap",version="01.000.026",tested_source="4191ea21b7206367fd0749762f4fff89cf6f9e43"):
  number=version.rsplit(".",1)[-1]
@@ -63,6 +64,10 @@ def build(runtime,output,variant="native_bootstrap",version="01.000.026",tested_
    for name in ['ps5_backend.cpp','ps5_backend.h','ps5_port_pool.hpp','ps5_audio_mutex.hpp','ps5_mixer_workers.hpp']:
     shutil.copyfile(ROOT/'client/ports/openal'/name,kit/'openal-startup-source/alc/backends'/name)
     dest=kit/'consumer-source/client/ports/openal'/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/'client/ports/openal'/name,dest)
+   shutil.copyfile(ROOT/'client/ports/openal/ps5_capture.hpp',kit/'openal-startup-source/alc/backends/ps5_capture.hpp')
+   shutil.copyfile(ROOT/'client/ports/openal/ps5_capture.hpp',kit/'consumer-source/client/ports/openal/ps5_capture.hpp')
+   shutil.copyfile(ROOT/'client/ports/openal/microphone_jni.c',kit/'consumer-source/client/ports/openal/microphone_jni.c')
+   shutil.copyfile(ROOT/'client/ports/openal/ps5_audioin_imports.c',kit/'consumer-source/client/ports/openal/ps5_audioin_imports.c')
    cmake=kit/'openal-startup-source/CMakeLists.txt'
    cmake.write_text(cmake.read_text()+'\ntarget_sources(OpenAL PRIVATE alc/backends/ps5_backend.cpp)\ntarget_include_directories(OpenAL PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/alc/backends")\n')
    patched.write_text(patched.read_text().replace('#include "ps5_backend.h"','#include "backends/ps5_backend.h"'))

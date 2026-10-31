@@ -6,6 +6,7 @@
 #include "config.h"
 #include "ps5_backend.h"
 #include "ps5_port_pool.hpp"
+#include "ps5_capture.hpp"
 #include <array>
 #include <atomic>
 #include <cstdint>
@@ -17,6 +18,9 @@
 #include "core/device.h"
 #include "core/helpers.h"
 extern "C" {
+int sceUserServiceGetInitialUser(int*);
+int sceAudioInInit();int sceAudioInOpen(int,unsigned,unsigned,unsigned,unsigned,unsigned);
+int sceAudioInInput(int,void*);int sceAudioInClose(int);int sceAudioInGetSilentState(int);int sceAudioInGetRerouteCount(int);
 int sceAudioOutInit();
 int sceAudioOutOpen(int,int,int,unsigned,unsigned,unsigned);
 int sceAudioOutOutput(int,const void*);
@@ -143,15 +147,70 @@ struct Ps5Backend final : BackendBase {
     }
 };
 }
+namespace {
+constexpr auto CaptureName="PS5 system microphone (select DualSense in PS5 settings)";
+std::atomic<bool> captureEnabled{false},captureLeased{false};
+ps5audio::Capture capture;
+ps5audio::CaptureApi captureApi(){return {sceUserServiceGetInitialUser,sceAudioInInit,sceAudioInOpen,sceAudioInInput,sceAudioInGetSilentState,sceAudioInGetRerouteCount,sceAudioInClose};}
+struct CaptureLease {
+ bool owned=false;
+ bool acquire(){bool expected=false;owned=captureLeased.compare_exchange_strong(expected,true,std::memory_order_acq_rel);return owned;}
+ void release(){if(owned&&capture.close()){captureLeased.store(false,std::memory_order_release);owned=false;}}
+ ~CaptureLease(){release();} // Failed close pins ownership; do not orphan a live port.
+};
+struct Ps5Capture final : BackendBase {
+ explicit Ps5Capture(gsl::not_null<DeviceBase*> device) noexcept:BackendBase{device}{}
+ CaptureLease lease;std::atomic<bool> kill{true};pthread_t thread{};bool started=false;
+ ~Ps5Capture() override {stop();lease.release();}
+ void open(std::string_view name) override {
+  if(!captureEnabled.load(std::memory_order_acquire)||(!name.empty()&&name!=CaptureName))throw al::backend_exception{al::backend_error::NoDevice,"PS5 microphone capture disabled or unavailable"};
+  if(mDevice->mSampleRate!=48000||mDevice->FmtChans!=DevFmtMono||(mDevice->FmtType!=DevFmtFloat&&mDevice->FmtType!=DevFmtShort))throw al::backend_exception{al::backend_error::DeviceError,"PS5 capture requires 48kHz mono float32 or S16"};
+  if(!lease.acquire())throw al::backend_exception{al::backend_error::DeviceError,"PS5 microphone is in use or cleanup is pending"};
+  if(!capture.open(captureApi())){lease.release();throw al::backend_exception{al::backend_error::NoDevice,"PS5 system microphone could not open"};}
+  mDeviceName=CaptureName;mDevice->mBufferSize=ps5audio::Capture::Capacity;
+ }
+ static void* run(void* opaque) noexcept {
+  auto& self=*static_cast<Ps5Capture*>(opaque);
+  while(!self.kill.load(std::memory_order_acquire))if(!capture.pump()){self.mDevice->handleDisconnect("PS5 microphone capture failed");break;}
+  return nullptr;
+ }
+ void start() override {
+  if(started)return;if(!lease.owned||!captureEnabled.load(std::memory_order_acquire))throw al::backend_exception{al::backend_error::DeviceError,"PS5 microphone disabled"};
+  capture.clear();kill.store(false,std::memory_order_release);pthread_attr_t attr;int rc=pthread_attr_init(&attr);
+  if(!rc){rc=pthread_attr_setstacksize(&attr,128*1024);if(!rc)rc=pthread_create(&thread,&attr,run,this);pthread_attr_destroy(&attr);}
+  if(rc){kill.store(true,std::memory_order_release);throw al::backend_exception{al::backend_error::DeviceError,"PS5 microphone worker unavailable"};}started=true;
+ }
+ void stop() override {kill.store(true,std::memory_order_release);if(started){pthread_join(thread,nullptr);started=false;}capture.clear();}
+ auto availableSamples()->std::size_t override{return capture.available();}
+ void captureSamples(std::span<std::byte> out) override {
+  unsigned frame=mDevice->FmtType==DevFmtFloat?sizeof(float):sizeof(std::int16_t);
+  if(out.size()%frame||!capture.take(out.data(),unsigned(out.size()/frame),mDevice->FmtType==DevFmtFloat))throw al::backend_exception{al::backend_error::DeviceError,"Not enough PS5 microphone samples"};
+ }
+};
+}
+extern "C" __attribute__((visibility("default"))) void client_ps5_capture_enable(int enabled){captureEnabled.store(enabled!=0,std::memory_order_release);}
+extern "C" __attribute__((visibility("default"))) void client_ps5_capture_probe(char* result,unsigned size){
+ if(!result||!size)return;CaptureLease lease;
+ if(!lease.acquire()){std::snprintf(result,size,"Microphone busy or previous cleanup failed. Restart the app.");return;}
+ if(!capture.open(captureApi())){std::snprintf(result,size,"AudioIn open failed (0x%x). Select your microphone in PS5 settings; capture remains unvalidated.",unsigned(capture.error));return;}
+ bool good=true;for(unsigned n=0;n<313;n++)if(!capture.pump()){good=false;break;}
+ std::snprintf(result,size,"%s: blocks=%llu nonzero=%llu peak=%d silent-blocks=%llu. System-selected route; DualSense identity and mute need console confirmation. No recording saved.",good?"Input reads completed":"Capture failed",(unsigned long long)capture.blocks,(unsigned long long)capture.nonzero,capture.peak,(unsigned long long)capture.silent_blocks);
+ if(!capture.close())std::snprintf(result,size,"Microphone close failed (0x%x). Ownership retained; restart the app.",unsigned(capture.error));
+}
+
 extern "C" __attribute__((visibility("default"))) int client_ps5_audio_worker_preinit() {return mixerWorkers.preinit();}
 auto Ps5BackendFactory::init() -> bool {return true;}
-auto Ps5BackendFactory::querySupport(BackendType type) -> bool {return type==BackendType::Playback;}
+auto Ps5BackendFactory::querySupport(BackendType type) -> bool {return type==BackendType::Playback||type==BackendType::Capture;}
 auto Ps5BackendFactory::enumerate(BackendType type) -> std::vector<std::string> {
     if(type==BackendType::Playback)return {DeviceName};
+    if(type==BackendType::Capture&&captureEnabled.load(std::memory_order_acquire)){
+        CaptureLease probe;if(probe.acquire()&&capture.open(captureApi())&&capture.pump()){probe.release();if(!probe.owned)return {CaptureName};}
+    }
     return {};
 }
 auto Ps5BackendFactory::createBackend(gsl::not_null<DeviceBase*> device,BackendType type) -> BackendPtr {
     if(type==BackendType::Playback)return BackendPtr{new Ps5Backend{device}};
+    if(type==BackendType::Capture)return BackendPtr{new Ps5Capture{device}};
     return nullptr;
 }
 auto Ps5BackendFactory::getFactory() -> BackendFactory& {static Ps5BackendFactory factory;return factory;}

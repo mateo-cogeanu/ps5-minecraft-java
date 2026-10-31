@@ -21,12 +21,12 @@ missing-dependency skips. Each process has a 180-second bound; workflows have
 existing checks use assertions. Imports of `host_toolchain.py` do no discovery,
 argument parsing or downloads. Individual migrated test entrypoints remain usable.
 
-The fourteen fast checks include three bootstrap/audit/identity checks, discovery regressions and ten existing launcher
+The fifteen fast checks include three bootstrap/audit/identity checks, discovery regressions and ten existing launcher
 checks: auth state transitions/redaction, saved-login migration/refresh/sign-out,
 local TLS refusal/body/redirect behavior, storage errors, instance persistence and
 verified download/install/launch restrictions, Modrinth queues/recursive dependencies,
 genuine Fabric version predicates and upgrade/rollback decisions, signed offline
-ownership, deletion recovery, and duplicate isolation/cancellation. In-memory
+ownership, deletion recovery, and duplicate isolation/cancellation. The additional local-web check exercises real loopback sockets, pairing/session/origin rules, staging/format/path boundaries, interrupted/full-volume failure cleanup and service ownership/restarts. In-memory
 transports, generated tiny JAR fixtures and temporary directories exercise actual
 launcher code. HTTPS uses a disposable localhost TLS server and keytool certificate.
 No real Microsoft/Modrinth request or Minecraft execution is part of assertions.
@@ -34,9 +34,9 @@ The instance test's formerly unsupported 26.2 fixture is now unsupported 26.1;
 26.2/26.3 support remains explicitly checked without changing production policy.
 
 The native runner forces UBSan errors to fail (`halt_on_error=1`), including local runs.
-The five optional native checks exercise actual scoped audio mutex/port/worker
+The six optional native checks exercise actual scoped audio mutex/port/worker
 implementations, desktop HID/model policy and resident-library JNI loading, with
-controlled OS boundaries. They require no external graphics/audio library. They
+controlled OS boundaries. The microphone check runs the actual bounded capture core with injected AudioIn calls, including silence/route changes, conversion, failure ownership and concurrent producer/consumer cleanup. It does not capture host or PS5 speech. They require no external graphics/audio library. They
 do **not** exercise OpenAL rendering, SDL, RADV, MoltenVK, Vulkan or a PS5 driver.
 The JNI test uses platform headers, `.dylib`/`-dynamiclib` on macOS and
 `.so`/`-shared -fPIC` plus libdl on Linux. Linux loads Clang's shared UBSan runtime

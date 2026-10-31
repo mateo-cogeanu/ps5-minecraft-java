@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-31",
+  "app_version": "01.000.170",
+  "title_id": "PPSA99874",
+  "acceptance": {
+    "launcher_input": "host-pass; PS5 pending",
+    "local_web": "real-socket host-pass; redesigned browser preview pending settings",
+    "microphone": "opt-in real AudioIn/OpenAL implementation; actual-core/real-OpenAL host-pass; PS5 ABI/speech/mute/voice-chat pending"
+  },
+  "checks": {
+    "fast": "15 PASS",
+    "native": "6 PASS with ASan/UBSan; existing JVM/sanitizer signal-handler warnings",
+    "real_OpenAL": "PASS playback failure/recovery/pacing fixtures plus capture default-off/enable/enumerate/start/float read/stop/close x20; host OS doubles only",
+    "full_SDK": "initial170PASS; final source rebuild pending",
+    "native_preview": "PASS111-field actual draw/mailbox/JNI cleanup fixture; not PS5/Vulkan evidence",
+    "browser": "initial manager desktop/390px pairing/upload/navigation/focus passed; redesigned cards/category UI awaiting browser access"
+  },
+  "console": {
+    "speech_and_mute": "not tested",
+    "remote_participant_hearing_ps5": "not tested",
+    "ps5_receiving_voice": "not tested",
+    "physical_network_QR_reachability": "not tested",
+    "input_switching": "not tested",
+    "world_save_input_audio_endurance": "not tested"
+  },
+  "release_created": false,
+  "store_updated": false,
+  "runtime_source_changed": false
+}

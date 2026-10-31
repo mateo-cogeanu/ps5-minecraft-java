@@ -157,6 +157,9 @@ The manual native lane instead tests scoped native implementations against fixtu
 | `test_vanilla_server.py` | Verified publisher/game/mod JARs or prepared build/cache fixtures; live variants may contact services; excluded from offline lane; observed: hardcoded Homebrew |
 | `test_world_metadata.py` | Verified publisher/game/mod JARs or prepared build/cache fixtures; live variants may contact services; excluded from offline lane; observed: hardcoded Homebrew |
 
+| `test_launcher_web.py` | Required fast lane; real local sockets, controlled addresses/storage, no account or console |
+| `test_microphone_capture.py` | Required native lane; actual capture core with AudioIn doubles under ASan/UBSan; no physical capture |
+
 ## Additional host-native fixtures
 
 | Entrypoint in `tools/` | Dependencies and boundary |

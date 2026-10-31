@@ -36,7 +36,7 @@ inline std::uint32_t ink(std::uint32_t rgb){return prospero_palette::raw_ink(pro
 // Inline aggregate storage preserves constructor-free startup and bounded stacks.
 struct Fields {
  bool operator==(const Fields&)const noexcept=default;
- std::array<std::array<char,512>,98> text{};
+ std::array<std::array<char,512>,104> text{};
  std::array<std::array<char,8192>,7> images{};
  template<class Char>struct Slot {Char* p;size_t length;Char* data()const noexcept{return p;}size_t size()const noexcept{return length;}Char& operator[](size_t i)const noexcept{return p[i];}};
  Slot<char> operator[](size_t i)noexcept {if(i>=96&&i<=102)return {images[i-96].data(),8192};return {text[i>=103?i-7:i].data(),512};}
@@ -220,7 +220,23 @@ inline void compose(Canvas& c) noexcept {
   label(c,70,185+slide,page==1?"A world of your own.":"Make it yours.",64);label(c,75,269+slide,page==1?"One instance. Its own settings, worlds and memories.":"Your worlds stay right where they are.",24,0x91ad9b);
   c.rounded(70,338+slide,620,548,28,ink(0x10221c));block(c,275,402+slide,204,page==1?number(24):number(18));title(c,105,690+slide,page==1?fields[22].data():fields[16].data(),42,540);label(c,108,761+slide,"JAVA EDITION / INSTANCE",24,0x8db69a);
   if(page==1){row_control(c,320+slide,"VERSION",fields[23].data(),row==0);row_control(c,430+slide,"LOADER",fields[82].data(),row==1,true);row_control(c,540+slide,"NAME",fields[22].data(),row==2);row_control(c,650+slide,"ICON","Choose instance icon",row==3);action(c,760,774+slide,1080,"CREATE & DOWNLOAD",row==4,true);wrap(c,790,884+slide,fields[70].data(),1000,1);}
-  else{row_control(c,310+slide,"INSTANCE NAME",fields[16].data(),row==0);row_control(c,420+slide,"INSTANCE ICON","Choose instance icon",row==1);action(c,760,535+slide,520,"MODS",row==2);action(c,1320,535+slide,520,"SHADERS",row==3);action(c,760,630+slide,520,"RESOURCE PACKS",row==4);action(c,1320,630+slide,520,"DUPLICATE INSTANCE",row==7);action(c,760,725+slide,520,"DONE",row==5,true);action(c,1320,725+slide,520,"DELETE INSTANCE",row==6);}
+  else{row_control(c,310+slide,"INSTANCE NAME",fields[16].data(),row==0);row_control(c,420+slide,"INSTANCE ICON","Choose instance icon",row==1);action(c,760,535+slide,520,"MODS",row==2);action(c,1320,535+slide,520,"SHADERS",row==3);action(c,760,630+slide,520,"RESOURCE PACKS",row==4);action(c,1320,630+slide,520,"DUPLICATE INSTANCE",row==7);action(c,760,725+slide,520,"DONE",row==5,true);action(c,1320,725+slide,520,"DELETE INSTANCE",row==6);action(c,760,820+slide,1080,"MANAGE FROM PHONE / BROWSER",row==8);action(c,110,805+slide,530,"MICROPHONE",row==9);}
+ }else if(page==16){
+  label(c,70,185,"Voice chat microphone",54);wrap(c,75,290,"Experimental PS5 system input. Choose DualSense microphone in PS5 system settings; a headset may change that route. This app never unmutes your microphone.",850,4);
+  wrap(c,75,510,"Test: only your own speech, with consent. Speak for five seconds, then repeat while muted. No recording is saved. Native capture is not console-validated yet.",850,5);
+  wrap(c,75,755,fields[85].data(),1740,5);
+  char enabled[80];std::snprintf(enabled,sizeof(enabled),"VOICE CAPTURE: %s",fields[82].data());action(c,1000,380,820,enabled,row==0);action(c,1000,490,820,"TEST INPUT - 5 SECONDS",row==1);action(c,1000,600,820,"BACK",row==2);
+ }else if(page==15){
+  label(c,70,185,"Manage from your browser",54);title(c,75,265,fields[16].data(),30,1700);
+  label(c,75,345,fields[107].data(),30,0xa9eab6);
+  if(fields[108][0]){
+   const char* matrix=fields[102].data();int size=std::atoi(matrix);const char* bits=std::strchr(matrix,':');
+   if(bits&&size>=21&&size<=85&&std::strlen(bits+1)==size_t(size*size)){++bits;int scale=std::min(8,440/size);c.rectangle(75,410,size*scale,size*scale,static_cast<ps5::demo::Color>(prospero_palette::raw_ink(0xffffff)));for(int y=0;y<size;y++)for(int x=0;x<size;x++)if(bits[y*size+x]=='1')c.rectangle(75+x*scale,410+y*scale,scale,scale,static_cast<ps5::demo::Color>(prospero_palette::raw_ink(0)));}
+   label(c,600,420,"PAIRING CODE",24,0xa9eab6);title(c,600,470,fields[109].data(),30,1180);
+   wrap(c,600,555,"Scan the QR, or type the address below. Enter this pairing code in your browser. Your device must reach this PS5 on a trusted local network.",1160,4);
+   title(c,75,870,fields[108].data(),24,1750);label(c,600,725,"LEFT / RIGHT  Choose network address",24);label(c,600,775,fields[110].data(),24);
+  }else wrap(c,75,470,"No usable address yet. Check the PS5 network. Close and reopen this screen to retry the service.",1600,3);
+  label(c,75,950,"CIRCLE  Stop service and revoke browser access",24);
  }else if(page==14){
   title(c,70,225,fields[82].data(),64,1750);content_icon(c,85,365,96,fields[96].data());title(c,220,385,fields[85].data(),36,1550);wrap(c,85,515,fields[70].data(),1640,3);
   action(c,760,740,520,"CANCEL",row==0,true);action(c,1320,740,520,"UNINSTALL",row==1);
@@ -326,10 +342,12 @@ inline void compose(Canvas& c) noexcept {
 #endif
   label(c,766,795,"Show next time",30);
  }else if(page==6){
-  label(c,70,185,"Enter text.",64);c.rounded(70,300,1770,116,22,ink(0x183c2a));title(c,103,330,fields[29].data(),42,1650);
+  label(c,70,185,fields[106].data(),64);c.rounded(70,300,1770,116,22,ink(0x183c2a));title(c,103,330,fields[29].data(),42,1650);
   const char* chars=std::strcmp(fields[66].data(),"LOWER")==0?"1234567890qwertyuiopasdfghjkl_zxcvbnm .-":"1234567890QWERTYUIOPASDFGHJKL_ZXCVBNM .-";int chosen=number(31);
-  for(int i=0;i<40;i++){int x=80+(i%10)*176,y=465+(i/10)*91;if(i==chosen)selection(c,x,y,152,73);c.rounded(x,y,152,73,16,ink(i==chosen?0x356647:0x172e24));char letter[2]={chars[i],0};label(c,x+61,y+21,letter,30);}
-  const char* edits[]={"BACKSPACE","SPACE","CASE","CANCEL","DONE"};for(int i=0;i<5;i++)action(c,70+i*360,855,330,edits[i],false,i==4);
+  bool physical=std::strcmp(fields[105].data(),"PHYSICAL")==0;
+  if(physical)wrap(c,103,470,"Type on your keyboard. Enter confirms; Esc cancels. Use the controller to show its keyboard again.",1560,3);
+  if(!physical)for(int i=0;i<40;i++){int x=80+(i%10)*176,y=465+(i/10)*91;if(i==chosen)selection(c,x,y,152,73);c.rounded(x,y,152,73,16,ink(i==chosen?0x356647:0x172e24));char letter[2]={chars[i],0};label(c,x+61,y+21,letter,30);}
+  const char* edits[]={"BACKSPACE","SPACE","CASE","CANCEL","DONE"};for(int i=0;i<5;i++)if(!physical||i>=3)action(c,70+i*360,855,330,edits[i],false,i==4);
  }
 #ifdef PROSPERO_TOOLKIT
  c.end_content();
@@ -387,12 +405,13 @@ inline bool update() noexcept {
   if(!pad_connected)pressed=0;
   pressed|=navigation.sample(batch[i].buttons,batch[i].lx,batch[i].ly,batch[i].connected,current_time);
  }
- pressed|=navigation.repeat(current_time);
+ unsigned repeated=navigation.repeat(current_time);if(std::strcmp(fields[105].data(),"PHYSICAL")!=0)pressed|=repeated;
  if(pressed&0x4000)pressed_at=current_time;
  if(pressed){desktop.cursor=false;pointer_kind=-1;}
  push_input(pressed);
  bool desktop_changed=desktop.poll(current_time,[](unsigned command){push_input(command);},[](int x,int y,bool click){
   int page=number(11);auto hit=desktop_hit(page,x,y,page==0?number(14):number(84),page==0?number(13):page==12?number(93):number(83),layout_slide,std::strcmp(fields[71].data(),"OFFLINE")==0,std::strcmp(fields[103].data(),"INSTALLED")==0,std::strcmp(fields[82].data(),"Shaders")==0);
+if(page==6&&std::strcmp(fields[105].data(),"PHYSICAL")==0&&hit.kind==2)hit={};
 #ifdef PROSPERO_TOOLKIT
   if(page==9&&prospero_ui::healthy){hui::ui::Canvas c{prospero_ui::surface->list,prospero_ui::surface->fonts,prospero_ui::surface->renderer.glass_texture(),prospero_ui::effects->clock};auto& dialog=prospero_ui::effects->dialog;auto r=dialog.panel_rect(c);float left=r.x+dialog.style.padding,yy=r.y+r.h-dialog.style.padding-dialog.style.button_height;float width=(r.w-2*dialog.style.padding-dialog.style.button_gap)/2;for(int i=0;i<2;i++)if(x>=left+i*(width+dialog.style.button_gap)&&x<left+i*(width+dialog.style.button_gap)+width&&y>=yy&&y<yy+dialog.style.button_height)hit={3,i};}
 #else
@@ -472,8 +491,8 @@ inline jboolean menu(JNIEnv* env,jclass owner){
   auto array=static_cast<jobjectArray>(env->CallStaticObjectMethod(owner,tick,static_cast<jint>(take_input())));
   if(env->ExceptionCheck()||!array){failed=true;break;}
   Fields next{};
-  if(env->GetArrayLength(array)!=105){env->DeleteLocalRef(array);failed=true;break;}
-  for(int i=0;i<105;++i){auto value=static_cast<jstring>(env->GetObjectArrayElement(array,i));if(!value){failed=true;break;}const char* bytes=env->GetStringUTFChars(value,nullptr);if(!bytes){env->DeleteLocalRef(value);failed=true;break;}std::snprintf(next[i].data(),next[i].size(),"%s",bytes);env->ReleaseStringUTFChars(value,bytes);env->DeleteLocalRef(value);}
+  if(env->GetArrayLength(array)!=111){env->DeleteLocalRef(array);failed=true;break;}
+  for(int i=0;i<111;++i){auto value=static_cast<jstring>(env->GetObjectArrayElement(array,i));if(!value){failed=true;break;}const char* bytes=env->GetStringUTFChars(value,nullptr);if(!bytes){env->DeleteLocalRef(value);failed=true;break;}std::snprintf(next[i].data(),next[i].size(),"%s",bytes);env->ReleaseStringUTFChars(value,bytes);env->DeleteLocalRef(value);}
   env->DeleteLocalRef(array);if(failed)break;
   publish(next);online.store(true,std::memory_order_release);
   launch=std::strcmp(next[10].data(),"LAUNCH")==0;

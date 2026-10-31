@@ -46,11 +46,11 @@ namespace ps5::demo {
 extern "C" void sceVideoOutSetBufferAttribute2(VideoAttribute*,uint64_t,uint32_t,uint32_t,uint32_t,uint64_t,uint32_t,uint64_t){}
 extern "C" int sceVideoOutRegisterBuffers2(int32_t,int32_t,int32_t,VideoBuffer*,int32_t,VideoAttribute*,int32_t,void*){return 0;}
 }
-static pthread_t jni_owner{};static std::string ui_strings[105];static unsigned java_calls=0;
+static pthread_t jni_owner{};static std::string ui_strings[111];static unsigned java_calls=0;
 static void check_jni(){assert(pthread_equal(jni_owner,pthread_self()));}
 static jmethodID method_id(JNIEnv*,jclass,const char*,const char*){check_jni();return reinterpret_cast<jmethodID>(1);}
 static jobject java_tick(JNIEnv*,jclass,jmethodID,va_list args){check_jni();++java_calls;unsigned buttons=va_arg(args,jint);if(buttons&0x4000)ui_strings[10]="LAUNCH";return reinterpret_cast<jobject>(1);}
-static jsize array_length(JNIEnv*,jarray){check_jni();return 105;}
+static jsize array_length(JNIEnv*,jarray){check_jni();return 111;}
 static jobject array_element(JNIEnv*,jobjectArray,jsize index){check_jni();return reinterpret_cast<jobject>(uintptr_t(index+10));}
 static const char* utf_chars(JNIEnv*,jstring value,jboolean*){check_jni();return ui_strings[reinterpret_cast<uintptr_t>(value)-10].c_str();}
 static void release_chars(JNIEnv*,jstring,const char*){check_jni();}
@@ -81,7 +81,7 @@ int main(int argc,char**argv){assert(argc==2);
  snprintf(prospero_menu::fields[11].data(),512,"3");snprintf(prospero_menu::fields[12].data(),512,"2");
  snprintf(prospero_menu::fields[3].data(),512,"ABCD-EFGH");snprintf(prospero_menu::fields[4].data(),512,"https://www.microsoft.com/link");snprintf(prospero_menu::fields[2].data(),512,"Approve sign-in on your phone or computer");
  output=std::string(argv[1])+"/signin.ppm";operations.clear();prospero_menu::focus={};assert(ps5::demo::run_ui_until(prospero_menu::draw,update,stop,"preview"));
- for(const char* scene:{"keybinds","uninstall","shaders","mods-installed","mods-downloading","mods","empty","create","settings","detail","offline","offline-edit","delete","delete-confirm","edit","keyboard","intro","intro-checkbox","intro-unchecked","controls","pending","account-saved","dropdown-version","dropdown-icons","dropdown-resolution","loading-controls","instances","controls-menus","controls-keyboard","controls-shortcuts","controls-touchpad","settings-top"}){
+ for(const char* scene:{"keybinds","uninstall","shaders","mods-installed","mods-downloading","mods","empty","create","settings","detail","offline","offline-edit","delete","delete-confirm","edit","keyboard","intro","intro-checkbox","intro-unchecked","controls","pending","account-saved","dropdown-version","dropdown-icons","dropdown-resolution","loading-controls","instances","controls-menus","controls-keyboard","controls-shortcuts","controls-touchpad","settings-top","keyboard-physical","web-unavailable"}){
   int page=std::strcmp(scene,"uninstall")==0?14:std::strcmp(scene,"keybinds")==0?13:(std::strncmp(scene,"mods",4)==0||std::strcmp(scene,"shaders")==0)?12:std::strcmp(scene,"account-saved")==0?3:std::strcmp(scene,"instances")==0?0:std::strcmp(scene,"settings-top")==0?2:std::strncmp(scene,"controls-",9)==0?8:std::strcmp(scene,"loading-controls")==0?11:std::strncmp(scene,"delete",6)==0?9:std::strcmp(scene,"offline-edit")==0?5:std::strcmp(scene,"pending")==0?4:std::strcmp(scene,"controls")==0?8:std::strncmp(scene,"intro",5)==0?7:std::strcmp(scene,"empty")==0?0:std::strcmp(scene,"create")==0?1:std::strcmp(scene,"settings")==0?2:(std::strcmp(scene,"detail")==0||std::strcmp(scene,"offline")==0)?4:std::strcmp(scene,"edit")==0?5:6;
   snprintf(prospero_menu::fields[11].data(),512,"%d",page);snprintf(prospero_menu::fields[12].data(),512,"%d",page==2?1:page==3?2:0);snprintf(prospero_menu::fields[13].data(),512,"0");snprintf(prospero_menu::fields[16].data(),512,"Vanilla 26.3");snprintf(prospero_menu::fields[17].data(),512,"26.3");snprintf(prospero_menu::fields[18].data(),512,"1");snprintf(prospero_menu::fields[22].data(),512,"Weekend world");snprintf(prospero_menu::fields[23].data(),512,"26.3");snprintf(prospero_menu::fields[24].data(),512,"2");snprintf(prospero_menu::fields[25].data(),512,"1920 x 1080");snprintf(prospero_menu::fields[26].data(),512,"4");snprintf(prospero_menu::fields[27].data(),512,"ON");snprintf(prospero_menu::fields[29].data(),512,"Weekend world");snprintf(prospero_menu::fields[2].data(),512,"");snprintf(prospero_menu::fields[68].data(),512,"ON");snprintf(prospero_menu::fields[65].data(),512,"26.3 native gameplay baseline");
   snprintf(prospero_menu::fields[73].data(),512,"%s",std::strncmp(scene,"offline",7)==0?"OFFLINE BRANCH":"TEMP GAMETEST");snprintf(prospero_menu::fields[15].data(),512,"0");if(std::strcmp(scene,"delete-confirm")==0)snprintf(prospero_menu::fields[15].data(),512,"1");if(std::strcmp(scene,"offline-edit")==0)snprintf(prospero_menu::fields[15].data(),512,"3");
@@ -109,6 +109,8 @@ int main(int argc,char**argv){assert(argc==2);
   if(page==14){snprintf(prospero_menu::fields[82].data(),512,"Uninstall this file?");snprintf(prospero_menu::fields[85].data(),512,"vitrail-0.13.0-beta+mc26.3.jar");snprintf(prospero_menu::fields[70].data(),512,"Only this file is removed. Worlds and settings are kept. Mods that depend on it may stop working.");snprintf(prospero_menu::fields[15].data(),512,"0");}
   if(std::strcmp(scene,"shaders")==0){snprintf(prospero_menu::fields[82].data(),512,"Shaders");snprintf(prospero_menu::fields[95].data(),512,"SHADOWS: 50%%");snprintf(prospero_menu::fields[15].data(),512,"11");}
   if(std::strcmp(scene,"settings-top")==0){snprintf(prospero_menu::fields[28].data(),512,"TOP");snprintf(prospero_menu::fields[15].data(),512,"-1");}
+  if(std::strcmp(scene,"keyboard-physical")==0){snprintf(prospero_menu::fields[11].data(),512,"6");snprintf(prospero_menu::fields[105].data(),512,"PHYSICAL");snprintf(prospero_menu::fields[106].data(),512,"Rename instance");snprintf(prospero_menu::fields[29].data(),512,"Unfinished text");}
+  if(std::strcmp(scene,"web-unavailable")==0){snprintf(prospero_menu::fields[11].data(),512,"15");snprintf(prospero_menu::fields[107].data(),512,"No private IPv4 address available");}
   output=std::string(argv[1])+"/"+scene+".ppm";prospero_menu::focus={};assert(ps5::demo::run_ui_until(prospero_menu::draw,update,stop,"preview"));if(std::strcmp(scene,"settings-top")==0){assert(prospero_menu::focus.x==1245&&prospero_menu::focus.y==52&&prospero_menu::focus.w==280&&prospero_menu::focus.h==68);}
  }
  assert(ps5::demo::run_ui_until(animation_check,update,stop,""));
@@ -126,7 +128,7 @@ int main(int argc,char**argv){assert(argc==2);
  prospero_menu::exit_requested=true;pthread_join(prospero_menu::ui_thread,nullptr);
  assert(prospero_menu::display_done.load()&&prospero_menu::display_ok.load());assert(!storage);assert((operations==std::vector<std::string>{"close","unmap","release"}));
  operations.clear();notifications_before=notifications;assert(prospero_menu::start_frontend());assert(notifications==notifications_before);jni_owner=pthread_self();
- for(int i=0;i<105;++i)ui_strings[i]=i<12?values[i]:"";
+ for(int i=0;i<111;++i)ui_strings[i]=i<12?values[i]:"";
  JNINativeInterface_ functions{};functions.GetStaticMethodID=method_id;functions.CallStaticObjectMethodV=java_tick;
  functions.GetArrayLength=array_length;functions.GetObjectArrayElement=array_element;functions.GetStringUTFChars=utf_chars;functions.ReleaseStringUTFChars=release_chars;functions.DeleteLocalRef=delete_ref;functions.ExceptionCheck=exception_check;
  JNIEnv environment{&functions};prospero_menu::push_input(0x4000);
@@ -143,6 +145,6 @@ jdk=Path('/Library/Java/JavaVirtualMachines/openjdk-25.jdk/Contents/Home')
 subprocess.run(['clang++','-arch','x86_64','-std=c++20','-O1','-I'+str(runtime/'native/renderer'),'-I'+str(runtime/'build/native'),'-I'+str(runtime/'src'),'-I'+str(jdk/'include'),'-I'+str(jdk/'include/darwin'),str(w/'preview.cpp'),'-o',str(w/'preview')],check=True)
 subprocess.run([str(w/'preview'),str(w)],check=True,timeout=30)
 from PIL import Image
-for name in ['keybinds','uninstall','shaders','mods-installed','mods-downloading','mods','home','signin','empty','create','settings','detail','offline','offline-edit','delete','delete-confirm','edit','keyboard','intro','intro-checkbox','intro-unchecked','controls','pending','account-saved','dropdown-version','dropdown-icons','dropdown-resolution','loading-controls','instances','controls-menus','controls-keyboard','controls-shortcuts','controls-touchpad','settings-top']:
+for name in ['keybinds','uninstall','shaders','mods-installed','mods-downloading','mods','home','signin','empty','create','settings','detail','offline','offline-edit','delete','delete-confirm','edit','keyboard','intro','intro-checkbox','intro-unchecked','controls','pending','account-saved','dropdown-version','dropdown-icons','dropdown-resolution','loading-controls','instances','controls-menus','controls-keyboard','controls-shortcuts','controls-touchpad','settings-top','keyboard-physical','web-unavailable']:
  with Image.open(w/(name+'.ppm'))as picture:picture.save(w/(name+'.png'))
 print(w/'home.png')

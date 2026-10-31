@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-31",
+  "title_id": "PPSA99874",
+  "app_version": "01.000.169",
+  "status": {
+    "launcher_input": "host-pass; exact-console-pending",
+    "local_web": "host-and-real-browser-pass; exact-console-pending",
+    "controller_microphone": "blocked-no-verified-AudioIn-route/mute-contract; not implemented"
+  },
+  "checks": {
+    "fast": "15 PASS on initial run; a later concurrent duplicate fixture timed out, then passed in isolation; final170 lanes recorded separately",
+    "native": "5 PASS; existing UBSan/JVM signal-handler diagnostics retained",
+    "web": "PASS real sockets and injected full-volume cleanup",
+    "browser": "PASS actual running service: desktop and390px phone, pairing/direct-instance/home, generated pack upload/list refresh, Tab focus; no horizontal overflow",
+    "cpu_native_preview": "PASS updated111-field actual JNI/mailbox/draw/handoff fixtures; not Vulkan/PS5 proof"
+  },
+  "final_package": "not final; retained locally in client169-initial-build-only",
+  "release_created": false,
+  "store_updated": false,
+  "purpose": "Preserved intermediate169 build only; superseded by170 before console handoff",
+  "package_sha256": "a8e926bb222b1f1eaf15cdf3c7343ac409e3f1d08ab2d5609d7a0599865bf422"
+}

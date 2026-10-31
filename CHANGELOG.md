@@ -1,5 +1,19 @@
 # Changelog
 
+## 01.000.170 — local launcher-style web UI and opt-in native microphone
+
+- Replace the initial manager layout with native launcher icon cards and themed Mods/Resource packs/Shaders/Schematics upload sections, keeping the paired service and bounded storage rules.
+- Implement default-off resident PS5 AudioIn capture through original OpenAL, bounded mono16kHz→48kHz conversion, conservative silent-state/route handling and explicit no-recording five-second launcher test. The route is labeled system-selected; built-in DualSense/headset identity is not inferred.
+- Add actual capture-core sanitizer tests and real OpenAL capture lifecycle tests with host AudioIn doubles. Exact PS5 non-silent speech, mute, native ABI/profile, mod/server voice and regression/endurance remain pending. Original Simple Voice Chat JARs remain unchanged and are not auto-installed.
+- [Test guide](docs/client-local-management-170.md), [capture evidence and limits](docs/controller-microphone-investigation.md). No release/Store update.
+
+## 01.000.169 — local input switching and browser management candidate
+
+- Keep launcher edits across controller/physical-input switches and last-keyboard disconnect; hide the controller grid during physical entry. Game ownership remains unchanged.
+- Add an instance-settings QR/manual URL, random pairing, expiring sessions and menu-scoped local HTTP service, with streamed bounded content uploads, explicit schematic destinations, list/removal/refresh, storage/link/format checks and shared theme tokens.
+- Add real-socket and HID/model tests, browser phone/desktop verification and exact local test packaging. Host results do not establish reachable PS5 networking.
+- Investigate original Simple Voice Chat Fabric2.6.27 artifacts and upstream OpenAL capture; built-in controller capture is blocked by missing verified AudioIn/routing/mute contracts. No capture implementation or microphone/mod compatibility claim. [Scope and console plan](docs/client-local-management-170.md). No release/Store update.
+
 ## 01.000.167 — accepted launcher keyboard/mouse and Fabric26.2 release
 
 - Enable normal Fabric26.2 support after user acceptance of exact166.

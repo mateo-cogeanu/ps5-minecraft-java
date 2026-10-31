@@ -24,6 +24,13 @@ extern "C" int test_audio_waits(){return waits;}
 extern "C" int test_audio_attempts(){return open_attempts;}
 extern "C" int sceKernelUsleep(unsigned usec){assert(usec==50000);++waits;return mode==9?-44:0;}
 extern "C" double test_audio_balance(){return double(left.load())/double(right.load());}
+extern "C" int sceUserServiceGetInitialUser(int* u){*u=1;return 0;}
+extern "C" int sceAudioInInit(){return 0;}
+extern "C" int sceAudioInOpen(int,unsigned,unsigned,unsigned,unsigned,unsigned){return mode==100?31:-99;}
+extern "C" int sceAudioInInput(int h,void* out){assert(h==31);auto* p=static_cast<std::int16_t*>(out);for(int i=0;i<256;i++)p[i]=i%2?12000:-12000;usleep(16000);return 256;}
+extern "C" int sceAudioInClose(int){return 0;}
+extern "C" int sceAudioInGetSilentState(int){return 0;}
+extern "C" int sceAudioInGetRerouteCount(int){return 0;}
 extern "C" int sceAudioOutInit(){int n=++init;if(mode==1)return -41;if((mode==4&&n<=2)||mode==5||mode==6||mode==8||mode==9)return static_cast<int>(0x80260002u);if(mode==7)return static_cast<int>(0x8026000eu);return 0;}
 extern "C" int sceAudioOutOpen(int user,int type,int index,unsigned frames,unsigned rate,unsigned format){assert(user==0xff&&type==0&&index==0&&frames==256&&rate==48000&&format==1);++open_attempts;if(mode==2||mode==8||mode==14)return -42;if(mode==15&&open_attempts==1)return static_cast<int>(0x8026000du);if((mode==4&&init<=2)||mode==5||mode==9)return static_cast<int>(0x8026000fu);++opens;return 17;}
 extern "C" int sceAudioOutOutput(int port,const void* data){assert(port==17);if(!data)return 0;auto pcm=(const int16_t*)data;assert((uintptr_t)data%64==0);int n=++blocks;
@@ -49,11 +56,25 @@ subprocess.run(['install_name_tool','-id',str(library),str(library)],check=True)
 #include <cstring>
 #include <unistd.h>
 extern "C" {void test_audio_mode(int);int test_audio_blocks();int test_audio_nonzero();int test_audio_opens();int test_audio_closes();int test_audio_inits();int test_audio_waits();int test_audio_attempts();double test_audio_balance();}
+extern "C" void client_ps5_capture_enable(int);
 static std::atomic<int> events{0};
 static void AL_APIENTRY event_callback(ALenum type,ALuint,ALuint,ALsizei,const ALchar*,void*) noexcept {assert(type==AL_EVENT_TYPE_SOURCE_STATE_CHANGED_SOFT);++events;}
 extern "C" int client_ps5_audio_worker_preinit();
 extern "C" int client_ps5_audio_event_preinit();
 int main(int argc,char**argv){assert(client_ps5_audio_event_preinit()==0);assert(client_ps5_audio_worker_preinit()==0);assert(client_ps5_audio_worker_preinit()==0);int mode=argc>1?atoi(argv[1]):0;test_audio_mode(mode);
+ if(mode==100){
+  extern void unused();
+  assert(alcCaptureOpenDevice(nullptr,48000,AL_FORMAT_MONO_FLOAT32,4096)==nullptr);
+  client_ps5_capture_enable(1);
+  const char* names=alcGetString(nullptr,ALC_CAPTURE_DEVICE_SPECIFIER);assert(names&&strstr(names,"PS5 system microphone"));
+  for(int cycle=0;cycle<20;cycle++){
+   auto* capture=alcCaptureOpenDevice(names,48000,AL_FORMAT_MONO_FLOAT32,4096);assert(capture);
+   alcCaptureStart(capture);ALCint count=0;for(int n=0;n<100&&!count;n++){usleep(1000);alcGetIntegerv(capture,ALC_CAPTURE_SAMPLES,1,&count);}assert(count>=768);
+   float samples[768];alcCaptureSamples(capture,samples,768);assert(alcGetError(capture)==ALC_NO_ERROR);bool nonzero=false;for(float x:samples){assert(std::isfinite(x)&&x>=-1&&x<=1);nonzero|=x!=0;}assert(nonzero);
+   alcCaptureStop(capture);assert(alcCaptureCloseDevice(capture));
+  }
+  client_ps5_capture_enable(0);assert(!alcCaptureOpenDevice(nullptr,48000,AL_FORMAT_MONO_FLOAT32,4096));puts("PASS real OpenAL capture path default-off/enable/enumerate/open/start/available/float samples/stop/close x20; host AudioIn source only");return 0;
+ }
  for(int cycle=0;cycle<(mode==3?1:3);++cycle){
   ALCdevice*d=alcOpenDevice("PS5 Speakers");
   if(mode==1||mode==2||mode==5||mode==8||mode==9||mode==14){assert(!d);assert(test_audio_opens()==0&&test_audio_closes()==0);
@@ -88,7 +109,7 @@ int main(int argc,char**argv){assert(client_ps5_audio_event_preinit()==0);assert
 ''')
 source=ROOT/'.tools/openal-soft-src'
 subprocess.run(['clang++','-std=c++17','-fsanitize=address,undefined','-I'+str(source/'include'),str(w/'driver.cpp'),str(library),'-Wl,-rpath,'+str(library.parent),'-o',str(w/'check')],check=True)
-for mode in [1,2,0,3,4,5,6,7,8,9,10,11,12,13,14,15]:
+for mode in [1,2,0,3,4,5,6,7,8,9,10,11,12,13,14,15,100]:
  result=subprocess.run([str(w/'check'),str(mode)],env=dict(os.environ,ALSOFT_DRIVERS='ps5',ALSOFT_LOGLEVEL='2',ALSOFT_LOCAL_PATH=str(w)),capture_output=True,text=True,timeout=30)
  (w/('mode'+str(mode)+'.log')).write_text(result.stdout+result.stderr)
  if result.returncode:print(result.stdout+result.stderr)
