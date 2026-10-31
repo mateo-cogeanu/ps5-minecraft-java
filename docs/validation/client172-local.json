@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-31",
+  "app_version": "01.000.172",
+  "title_id": "PPSA99874",
+  "implementation_commit": "4dcbc7958db59b0d1fad540a9f221e3d94b9d3bc",
+  "runtime_commit": "909a639",
+  "acceptance": "LOCAL TEST; exact172 physical console pending; no release/prerelease/Store authorization",
+  "artifacts_sha256": {
+    "PPSA99874.zip": "1d2f135a9866d5c3894b9e9b22b74ade433d8a5b942a61d86abdeae673447d6b",
+    "bootstrap-symbols.elf": "91f64057eb27e8ac8c0e8bd67a67f2b5fd4d9facd6d20b6a752fc2b8fc9a6634",
+    "client172-openal-source-relink.zip": "54d0fec5f271a47494b8bcbb0b38b89a13e09714062e387c36f07c68603d55e2"
+  },
+  "console_evidence_171": {
+    "identity": "Safari live session verifies01.000.171; user reports Loading terrain freeze",
+    "retrieval": "Cyberduck current Java console/startup succeeded; several live files denied by FTP. Safari HTTP retrieved full native VM trace and live resource counters",
+    "Java": "Sodium Async Cull Thread and Vitrail compile worker4 native creation EAGAIN; OutOfMemoryError unable to create native thread; emergency save/server shutdown",
+    "native": "Complete successful create/reap accounting reaches32MiB live owned stacks; eight further native failures while32MiB held, then emergency GC/shutdown. All owned stacks1MiB",
+    "errno_gate": "Trace has errnoENOMEM and uses old fallback;133 corrects a separate stale/zero errno bug",
+    "files": "192 descriptors at retrieval; soft/hard12555; no EMFILE finding",
+    "audio": "170 C++ exception-key abort not seen in readable171 run; voice speaker/microphone unavailable; no speech/mute/two-way success",
+    "unresolved": "Underlying native allocator stack refusal and exact172 recovery/endurance; raw reports local only"
+  },
+  "changes": {
+    "runtime133": "Returned EAGAIN controls bounded Java/compiler fallback; capacity rejection traces",
+    "runtime134": "Bootstrap-only explicit64MiB budget; runtime default32MiB/64slots unchanged; actual native create/requested sizes/shared256MiBledger/join/failedcleanup retained",
+    "consumer": "Enable134 beforeJVM; hash-pinned patch/tests/os_bsd.o; actual final setter/trace/policy audit; corresponding runtime sources in relink kit"
+  },
+  "checks": {
+    "host_fast": "15 PASS",
+    "host_native": "6 PASS",
+    "runtime_gate": "PASS actual extracted matrix with0/ENOMEM/EACCES errno,thread kinds,returned errors,original requested sizes and arguments",
+    "runtime_owner": "PASS actual default32 concurrent1MiB stacks reject33rd; extended33 concurrent1MiB real custom-stack workers and all joined reclaim;220 TLS/lifecycle/fault cases,slots/budget/late EBUSY under ASan/UBSan",
+    "HotSpot_target": "PASS rebuild,patch134 reversecheck; setter disassembly has no calls/allocator/TLS",
+    "startup_host": "PASS current original unmodified Main reaches expected absent host-native boundary; no host game orPS5 pass",
+    "package": "PASS complete CRC/signatures/content/native/Java package audit; requires exact new runtime object,pins,setter and embedded64MiB policy/refusal traces",
+    "relink": "PASS normal and accepted-OpenAL replacement byte-identical to finalELF;104manifest input hashes/sizes,runtime corresponding source pins,ZIPCRC",
+    "docs": "PASS1713 local links; git diff --check",
+    "hosted_policy": {
+      "url": "https://github.com/mateo-cogeanu/ProsperoCraft/actions/runs/41205712862",
+      "commit": "4dcbc7958db59b0d1fad540a9f221e3d94b9d3bc",
+      "policy (macos-15)": "success",
+      "policy (ubuntu-24.04)": "success"
+    }
+  },
+  "console_pending": [
+    "same instance/world and Complementary shader terrain entry",
+    "movement,save,reload and repeated transitions",
+    "shader-off comparison if failure persists",
+    "microphone non-silent speech,hardware mute,routing and original mod voice playback/capture",
+    "native memory/thread cleanup/endurance"
+  ]
+}
