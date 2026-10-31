@@ -1,5 +1,11 @@
 # Changelog
 
+## 01.000.173 — local voice speaker/context initialization repair
+
+- Reserve a second genuine AudioOut port before JVM pressure for the independent voice speaker; retain at most two drained ports across reloads. Failed native opens remain real errors.
+- Replace OpenAL per-context AL error native keys with bounded generation-tagged compiler TLS after172 loopback context key-set failure. Add simultaneous two-device PCM/loopback and portable error isolation/reuse/refusal checks.
+- Exact PS5 dual output, microphone speech/mute, mod voice and regressions remain pending. [Evidence/test guide](docs/client-voice-speaker-173.md). No release/Store update.
+
 ## 01.000.172 — local terrain worker stack budget
 
 - Enable runtime-owned bootstrap64MiB stack fallback budget after171 native trace reaches its32MiB boundary and Sodium/Vitrail worker creation fails. Preserve requested stack sizes,64slots,realnativecreation and joined cleanup; runtime default remains32MiB.

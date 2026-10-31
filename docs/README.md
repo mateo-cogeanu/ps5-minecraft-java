@@ -13,6 +13,7 @@ history; a development entry does not imply a public release.
 | Full target preparation, ownership and archived source | [Source organization](source-organization.md) |
 | Shared bootstrap, current identity and legacy package audits | [Tooling sharing](tooling-sharing.md) |
 | Published 167 scope | [Release notes](releases/client-input-fabric-167.md), [console acceptance](validation/client167-console-acceptance-2026-10-30.json) |
+| Local173 — voice speaker/context repair; console pending | [Evidence/test guide](client-voice-speaker-173.md) |
 | Local172 — terrain stack budget; console pending | [Evidence/test plan](client-terrain-thread-budget-172.md) |
 | Local171 — pairing/layout/voice-thread repair; console pending | [Test guide](client-local-management-171.md) |
 | Local 170 — input/web/microphone console checks pending | [Test guide](client-local-management-170.md), [capture investigation](controller-microphone-investigation.md) |

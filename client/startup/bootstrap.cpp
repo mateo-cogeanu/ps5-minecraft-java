@@ -47,7 +47,7 @@ static void notify(const char* text);
 extern "C" int sceAudioOutInit();
 extern "C" int client_ps5_audio_worker_preinit();
 extern "C" int client_ps5_audio_event_preinit();
-extern "C" {int client_ps5_audio_early_init_result=INT32_MIN;int client_ps5_audio_early_port=-1;}
+extern "C" {int client_ps5_audio_early_init_result=INT32_MIN;int client_ps5_audio_early_port=-1;int client_ps5_audio_secondary_port=-1;}
 using Initializer=void (*)();
 extern "C" Initializer __jvm_init_array_start[],__jvm_init_array_end[];
 #include <sys/mman.h>
@@ -317,9 +317,13 @@ void run_test(int i) {
   char audio_stage[160];std::snprintf(audio_stage,sizeof(audio_stage),"AudioOut pre-JVM init result=%d (0x%08X);failure is nonfatal",client_ps5_audio_early_init_result,static_cast<unsigned>(client_ps5_audio_early_init_result));log_stage(audio_stage);
   std::fprintf(stderr,"PS5 OpenAL AudioOut pre-JVM init result=%d\n",client_ps5_audio_early_init_result);std::fflush(stderr);
   // Reserve the real output port before JVM heaps and Vulkan allocations.
-  // OpenAL claims it and retains one drained port across logical device reloads.
+  // OpenAL claims it and retains two drained ports across logical device reloads.
   if(client_ps5_audio_early_init_result>=0||static_cast<unsigned>(client_ps5_audio_early_init_result)==0x8026000eu)
    client_ps5_audio_early_port=sceAudioOutOpen(0xff,0,0,256,48000,1);
+  // Voice chat opens a second independent logical playback device after world entry.
+  // Reserve its real native port before native heap pressure; failure is nonfatal.
+  if(client_ps5_audio_early_port>=0)client_ps5_audio_secondary_port=sceAudioOutOpen(0xff,0,0,256,48000,1);
+  std::fprintf(stderr,"PS5 OpenAL AudioOut pre-JVM secondary port result=%d\n",client_ps5_audio_secondary_port);std::fflush(stderr);
   (void)prospero_haptic_reserve();
   std::fprintf(stderr,"PS5 OpenAL AudioOut pre-JVM port result=%d (0x%08X)\n",client_ps5_audio_early_port,static_cast<unsigned>(client_ps5_audio_early_port));std::fflush(stderr);
   long page_size=sysconf(_SC_PAGESIZE);

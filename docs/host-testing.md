@@ -34,9 +34,9 @@ The instance test's formerly unsupported 26.2 fixture is now unsupported 26.1;
 26.2/26.3 support remains explicitly checked without changing production policy.
 
 The native runner forces UBSan errors to fail (`halt_on_error=1`), including local runs.
-The six optional native checks exercise actual scoped audio mutex/port/worker
+The seven optional native checks exercise actual scoped audio mutex/port/worker
 implementations, desktop HID/model policy and resident-library JNI loading, with
-controlled OS boundaries. The microphone check runs the actual bounded capture core with injected AudioIn calls, including silence/route changes, conversion, failure ownership and concurrent producer/consumer cleanup. It does not capture host or PS5 speech. They require no external graphics/audio library. They
+controlled OS boundaries. The microphone check runs the actual bounded capture core with injected AudioIn calls, including silence/route changes, conversion, failure ownership and concurrent producer/consumer cleanup. It does not capture host or PS5 speech. The context-error check covers generation reuse, thread isolation, bounded context capacity and refused native-key setters. They require no external graphics/audio library. They
 do **not** exercise OpenAL rendering, SDL, RADV, MoltenVK, Vulkan or a PS5 driver.
 The JNI test uses platform headers, `.dylib`/`-dynamiclib` on macOS and
 `.so`/`-shared -fPIC` plus libdl on Linux. Linux loads Clang's shared UBSan runtime

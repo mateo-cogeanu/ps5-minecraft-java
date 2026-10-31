@@ -68,7 +68,7 @@ assert 'pthread_' not in sdl_tls_undef,sdl_tls_undef
 assert 'SDL_SetError' not in sdl_tls_undef,sdl_tls_undef
 assert 'SDL_Generic_SetTLSData' in sdl_tls_undef
 
-assert symbols.get('client_ps5_audio_early_init_result') and symbols.get('client_ps5_audio_early_port')
+assert symbols.get('client_ps5_audio_early_init_result') and symbols.get('client_ps5_audio_early_port') and symbols.get('client_ps5_audio_secondary_port')
 imports=subprocess.check_output([str(LLVM/'llvm-nm'),'--undefined-only',str(elf)],text=True)
 for jna in ['Java_com_sun_jna_Native_getLastError','Java_com_sun_jna_Native_setLastError','Java_com_sun_jna_Native_sizeof','Java_com_sun_jna_Native_initIDs','ps5_builtin_load_jnidispatch']:assert symbols.get(jna),jna
 for api in ['sceKeyboardInit','sceKeyboardOpen','sceKeyboardRead','sceKeyboardClose','sceMouseInit','sceMouseOpen','sceMouseRead','sceMouseClose','scePadSetVibration','scePadSetVibrationMode']:assert api in imports
@@ -320,6 +320,7 @@ with zipfile.ZipFile(package)as z,zipfile.ZipFile(ROOT/'dist/milestones/Client_C
  undefined=subprocess.check_output([str(LLVM/'llvm-nm'),'--undefined-only',str(elf)],text=True)
  for name in ['sceAudioInInit','sceAudioInOpen','sceAudioInInput','sceAudioInClose','sceAudioInGetSilentState','sceAudioInGetRerouteCount']:assert ' U '+name in undefined,name
  capture_audit=json.loads(z.read(prefix+'assets/java25/openal-audit.json'))['startup_boundaries']['speaker_backend']
+ assert capture_audit['thread_error_header_sha256']==sha((ROOT/'client/ports/openal/ps5_thread_error.hpp').read_bytes())
  assert capture_audit['capture_header_sha256']==sha((ROOT/'client/ports/openal/ps5_capture.hpp').read_bytes())
  assert z.read(prefix+'assets/java25/QR-LICENSE.txt')==(ROOT/'client/launcher/QR-LICENSE.txt').read_bytes()
  assert z.read(prefix+'assets/java25/launcher-icon-source/attribution.json')==(ROOT/'assets/launcher-icons/attribution.json').read_bytes()

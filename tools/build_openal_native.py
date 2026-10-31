@@ -30,7 +30,9 @@ def build(runtime,host=False,offline=False):
  context=private/'alc/context.hpp';text=(source/'alc/context.hpp').read_text()
  for name in ['mPropLock','mEventCbLock','mDebugCbLock','mSourceLock','mEffectSlotLock']:
   assert text.count('std::mutex '+name+';')==1;text=text.replace('std::mutex '+name+';','ps5audio::Mutex '+name+';')
- context.write_text('#include "ps5_audio_mutex.hpp"\n'+text.replace('std::unique_lock<std::mutex>','std::unique_lock<ps5audio::Mutex>'))
+ shutil.copyfile(port/'ps5_thread_error.hpp',private/'alc/ps5_thread_error.hpp')
+ text=text.replace('tss<ALenum> mLastThreadError','ps5audio::ThreadError<ALenum> mLastThreadError')
+ context.write_text('#include "ps5_thread_error.hpp"\n#include "ps5_audio_mutex.hpp"\n'+text.replace('std::unique_lock<std::mutex>','std::unique_lock<ps5audio::Mutex>'))
  debug=private/'al/debug.cpp';debug.write_text((source/'al/debug.cpp').read_text().replace('std::unique_lock<std::mutex>','std::unique_lock<ps5audio::Mutex>'))
  shutil.copyfile(port/'ps5_mixer_workers.hpp',private/'core/ps5_mixer_workers.hpp')
  core_context=private/'core/context.h';core_context.write_text('#include "ps5_mixer_workers.hpp"\n'+(source/'core/context.h').read_text().replace('std::thread mEventThread;','ps5audio::MixerWorkers::Slot* mEventThread=nullptr;'))

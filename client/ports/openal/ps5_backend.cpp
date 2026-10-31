@@ -28,6 +28,7 @@ int sceAudioOutClose(int);
 int sceKernelUsleep(unsigned);
 extern int client_ps5_audio_early_init_result;
 extern int client_ps5_audio_early_port;
+extern int client_ps5_audio_secondary_port;
 }
 namespace {
 constexpr auto DeviceName="PS5 Speakers";
@@ -77,6 +78,7 @@ struct Ps5Backend final : BackendBase {
             throw al::backend_exception{al::backend_error::NoDevice,"Unknown PS5 audio device {}",name};
         {auto& state=audioState();const auto lock=std::lock_guard{state.mutex};
          if(client_ps5_audio_early_port>=0){port=client_ps5_audio_early_port;client_ps5_audio_early_port=-1;state.ready=true;report("adopt pre-JVM port",port);}
+         else if(client_ps5_audio_secondary_port>=0){port=client_ps5_audio_secondary_port;client_ps5_audio_secondary_port=-1;state.ready=true;report("adopt pre-JVM secondary port",port);}
         }
         if(port<0){port=ports().take();if(port>=0)report("reuse retained port",port);}
         if(port>=0){mDeviceName=DeviceName;return;}

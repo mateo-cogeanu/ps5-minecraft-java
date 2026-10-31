@@ -76,6 +76,8 @@ def build(runtime,output,variant="native_bootstrap",version="01.000.026",tested_
    for name in ['ps5_backend.cpp','ps5_backend.h','ps5_port_pool.hpp','ps5_audio_mutex.hpp','ps5_mixer_workers.hpp']:
     shutil.copyfile(ROOT/'client/ports/openal'/name,kit/'openal-startup-source/alc/backends'/name)
     dest=kit/'consumer-source/client/ports/openal'/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/'client/ports/openal'/name,dest)
+   shutil.copyfile(ROOT/'client/ports/openal/ps5_thread_error.hpp',kit/'openal-startup-source/alc/ps5_thread_error.hpp')
+   shutil.copyfile(ROOT/'client/ports/openal/ps5_thread_error.hpp',kit/'consumer-source/client/ports/openal/ps5_thread_error.hpp')
    shutil.copyfile(ROOT/'client/ports/openal/ps5_capture.hpp',kit/'openal-startup-source/alc/backends/ps5_capture.hpp')
    shutil.copyfile(ROOT/'client/ports/openal/ps5_capture.hpp',kit/'consumer-source/client/ports/openal/ps5_capture.hpp')
    shutil.copyfile(ROOT/'client/ports/openal/microphone_jni.c',kit/'consumer-source/client/ports/openal/microphone_jni.c')
