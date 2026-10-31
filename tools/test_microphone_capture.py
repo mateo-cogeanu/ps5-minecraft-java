@@ -27,7 +27,7 @@ int main(){
  route_after=true;assert(c.pump());assert(c.take(samples,768,true));for(float s:samples)assert(s==0);route_after=false;
  for(int n=0;n<100;n++)assert(c.pump());assert(c.available()==Capture::Capacity&&c.dropped>0);c.clear();assert(c.available()==0);
  input_rc=-5;assert(!c.pump()&&c.error==-5&&c.available()==0);input_rc=256;
- close_rc=-8;assert(!c.close()&&c.handle==9&&!c.healthy);close_rc=0;assert(c.close()&&c.handle==-1);
+ assert(c.close()&&c.handle==-1);Capture uncertain;assert(uncertain.open(api));close_rc=-8;assert(!uncertain.close()&&uncertain.handle==9&&!uncertain.healthy);int before_closes=closes;close_rc=0;assert(!uncertain.close()&&closes==before_closes);assert(!uncertain.open(api));
  for(int n=0;n<200;n++){assert(c.open(api)&&c.pump()&&c.close());}
  assert(c.open(api));std::atomic<bool> done{false};std::thread producer([&]{for(int i=0;i<5000;i++)assert(c.pump());done=true;});std::thread consumer([&]{float out[96];while(!done){unsigned n=std::min(96u,c.available());if(n)assert(c.take(out,n,true));}});producer.join();consumer.join();assert(c.close());
  mute=-7;assert(c.open(api));assert(!c.pump());assert(c.close());

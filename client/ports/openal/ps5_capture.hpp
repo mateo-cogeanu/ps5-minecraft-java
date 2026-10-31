@@ -15,7 +15,7 @@ struct CaptureApi {
 struct Capture {
  static constexpr unsigned Grain=256,InputRate=16000,Rate=48000,Capacity=16384;
  ps5audio::Mutex mutex;CaptureApi api{};int handle=-1,route=-1,error=0;
- bool healthy=false;float previous=0;bool previous_valid=false;
+ bool healthy=false,close_uncertain=false;float previous=0;bool previous_valid=false;
  std::array<float,Capacity> ring{};unsigned read=0,count=0;
  std::uint64_t blocks=0,nonzero=0,silent_blocks=0,dropped=0;int peak=0;
  alignas(64) std::array<std::int16_t,Grain> pcm{};
@@ -28,7 +28,7 @@ struct Capture {
   route=api.reroute(handle);if(route<0){error=route;closeLocked();return false;}
   healthy=true;error=0;read=count=0;previous_valid=false;blocks=nonzero=silent_blocks=dropped=0;peak=0;return true;
  }
- bool closeLocked(){if(handle<0)return true;int rc=api.close(handle);if(rc<0){error=rc;healthy=false;return false;}handle=-1;healthy=false;read=count=0;previous_valid=false;return true;}
+ bool closeLocked(){if(handle<0)return true;if(close_uncertain)return false;int rc=api.close(handle);if(rc<0){error=rc;healthy=false;close_uncertain=true;return false;}handle=-1;healthy=false;read=count=0;previous_valid=false;return true;}
  bool close(){const auto lock=std::lock_guard{mutex};return closeLocked();}
  // One producer. Caller joins it before close. Silence queries before AND after
  // input conservatively discard the complete block during mute/route changes.

@@ -32,6 +32,7 @@ def build(runtime,output,variant="native_bootstrap",version="01.000.026",tested_
  for name in ['main.o','renderer.o','crt.o','cpp_runtime.o',*(['native-exception-trace.o','native-mutex-trace.o']if variant=='startup' else [])]:args.append(keep(work/name))
  args+=[keep(ROOT/'build/client-graphics/libSceAgc.so'),keep(ROOT/'build/client-graphics/libSceAgcDriver.so')]
  if variant=='startup' and (work/'libSceMouse.so').exists():args.append(keep(work/'libSceMouse.so'))
+ if variant=='startup' and (work/'libSceAudioIn.so').exists():args.append(keep(work/'libSceAudioIn.so'))
  for token in flags:args.append(token if token.startswith('-')else keep(token))
  # All libraries are preserved explicitly; discard the build-machine search path.
  args=[token for token in args if not token.startswith('-L')]
@@ -93,6 +94,7 @@ def build(runtime,output,variant="native_bootstrap",version="01.000.026",tested_
    shutil.copyfile(ROOT/'build/openal-startup-boundary-ps5'/name,records/name)
   shutil.copyfile(ROOT/'client/ports/openal/startup_boundary.hpp',records/'startup_boundary.hpp')
   manifest['openal_extra_objects']=[keep(work/'startup-openal-trace-env.o')]
+  if (work/'microphone-jni.o').exists():manifest['openal_extra_objects'].append(keep(work/'microphone-jni.o'))
   manifest['startup_source']='openal-startup-source'
   manifest['scope']+=' Startup includes modified alc/helpers, bounded scopes and separate getenv shim; replacement OpenAL is combined with that exact shim.'
   (kit/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
