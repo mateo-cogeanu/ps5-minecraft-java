@@ -1,9 +1,9 @@
-/* 
+/*
  * QR Code generator library (Java)
- * 
+ *
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -44,9 +44,9 @@ import java.util.regex.Pattern;
  * - see {@link ProsperoQrSegmentAdvanced} for full kanji support.</p>
  */
 public final class ProsperoQrSegment {
-	
+
 	/*---- Static factory functions (mid level) ----*/
-	
+
 	/**
 	 * Returns a segment representing the specified binary data
 	 * encoded in byte mode. All input byte arrays are acceptable.
@@ -63,8 +63,8 @@ public final class ProsperoQrSegment {
 			bb.appendBits(b & 0xFF, 8);
 		return new ProsperoQrSegment(Mode.BYTE, data.length, bb);
 	}
-	
-	
+
+
 	/**
 	 * Returns a segment representing the specified string of decimal digits encoded in numeric mode.
 	 * @param digits the text (not {@code null}), with only digits from 0 to 9 allowed
@@ -76,7 +76,7 @@ public final class ProsperoQrSegment {
 		Objects.requireNonNull(digits);
 		if (!isNumeric(digits))
 			throw new IllegalArgumentException("String contains non-numeric characters");
-		
+
 		ProsperoBitBuffer bb = new ProsperoBitBuffer();
 		for (int i = 0; i < digits.length(); ) {  // Consume up to 3 digits per iteration
 			int n = Math.min(digits.length() - i, 3);
@@ -85,8 +85,8 @@ public final class ProsperoQrSegment {
 		}
 		return new ProsperoQrSegment(Mode.NUMERIC, digits.length(), bb);
 	}
-	
-	
+
+
 	/**
 	 * Returns a segment representing the specified text string encoded in alphanumeric mode.
 	 * The characters allowed are: 0 to 9, A to Z (uppercase only), space,
@@ -100,7 +100,7 @@ public final class ProsperoQrSegment {
 		Objects.requireNonNull(text);
 		if (!isAlphanumeric(text))
 			throw new IllegalArgumentException("String contains unencodable characters in alphanumeric mode");
-		
+
 		ProsperoBitBuffer bb = new ProsperoBitBuffer();
 		int i;
 		for (i = 0; i <= text.length() - 2; i += 2) {  // Process groups of 2
@@ -112,8 +112,8 @@ public final class ProsperoQrSegment {
 			bb.appendBits(ALPHANUMERIC_CHARSET.indexOf(text.charAt(i)), 6);
 		return new ProsperoQrSegment(Mode.ALPHANUMERIC, text.length(), bb);
 	}
-	
-	
+
+
 	/**
 	 * Returns a list of zero or more segments to represent the specified Unicode text string.
 	 * The result may use various segment modes and switch modes to optimize the length of the bit stream.
@@ -123,7 +123,7 @@ public final class ProsperoQrSegment {
 	 */
 	public static List<ProsperoQrSegment> makeSegments(CharSequence text) {
 		Objects.requireNonNull(text);
-		
+
 		// Select the most efficient segment encoding automatically
 		List<ProsperoQrSegment> result = new ArrayList<>();
 		if (text.equals(""));  // Leave result empty
@@ -135,8 +135,8 @@ public final class ProsperoQrSegment {
 			result.add(makeBytes(text.toString().getBytes(StandardCharsets.UTF_8)));
 		return result;
 	}
-	
-	
+
+
 	/**
 	 * Returns a segment representing an Extended Channel Interpretation
 	 * (ECI) designator with the specified assignment value.
@@ -160,8 +160,8 @@ public final class ProsperoQrSegment {
 			throw new IllegalArgumentException("ECI assignment value out of range");
 		return new ProsperoQrSegment(Mode.ECI, 0, bb);
 	}
-	
-	
+
+
 	/**
 	 * Tests whether the specified string can be encoded as a segment in numeric mode.
 	 * A string is encodable iff each character is in the range 0 to 9.
@@ -173,8 +173,8 @@ public final class ProsperoQrSegment {
 	public static boolean isNumeric(CharSequence text) {
 		return NUMERIC_REGEX.matcher(text).matches();
 	}
-	
-	
+
+
 	/**
 	 * Tests whether the specified string can be encoded as a segment in alphanumeric mode.
 	 * A string is encodable iff each character is in the following set: 0 to 9, A to Z
@@ -187,25 +187,25 @@ public final class ProsperoQrSegment {
 	public static boolean isAlphanumeric(CharSequence text) {
 		return ALPHANUMERIC_REGEX.matcher(text).matches();
 	}
-	
-	
-	
+
+
+
 	/*---- Instance fields ----*/
-	
+
 	/** The mode indicator of this segment. Not {@code null}. */
 	public final Mode mode;
-	
+
 	/** The length of this segment's unencoded data. Measured in characters for
 	 * numeric/alphanumeric/kanji mode, bytes for byte mode, and 0 for ECI mode.
 	 * Always zero or positive. Not the same as the data's bit length. */
 	public final int numChars;
-	
+
 	// The data bits of this segment. Not null. Accessed through getData().
 	final ProsperoBitBuffer data;
-	
-	
+
+
 	/*---- Constructor (low level) ----*/
-	
+
 	/**
 	 * Constructs a QR Code segment with the specified attributes and data.
 	 * The character count (numCh) must agree with the mode and the bit buffer length,
@@ -224,10 +224,10 @@ public final class ProsperoQrSegment {
 		numChars = numCh;
 		this.data = data.clone();  // Make defensive copy
 	}
-	
-	
+
+
 	/*---- Methods ----*/
-	
+
 	/**
 	 * Returns the data bits of this segment.
 	 * @return a new copy of the data bits (not {@code null})
@@ -235,8 +235,8 @@ public final class ProsperoQrSegment {
 	public ProsperoBitBuffer getData() {
 		return data.clone();  // Make defensive copy
 	}
-	
-	
+
+
 	// Calculates the number of bits needed to encode the given segments at the given version.
 	// Returns a non-negative number if successful. Otherwise returns -1 if a segment has too
 	// many characters to fit its length field, or the total bits exceeds Integer.MAX_VALUE.
@@ -254,64 +254,64 @@ public final class ProsperoQrSegment {
 		}
 		return (int)result;
 	}
-	
-	
+
+
 	/*---- Constants ----*/
-	
+
 	// Describes precisely all strings that are encodable in numeric mode.
 	private static final Pattern NUMERIC_REGEX = Pattern.compile("[0-9]*");
-	
+
 	// Describes precisely all strings that are encodable in alphanumeric mode.
 	private static final Pattern ALPHANUMERIC_REGEX = Pattern.compile("[A-Z0-9 $%*+./:-]*");
-	
+
 	// The set of all legal characters in alphanumeric mode, where
 	// each character value maps to the index in the string.
 	static final String ALPHANUMERIC_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
-	
-	
-	
+
+
+
 	/*---- Public helper enumeration ----*/
-	
+
 	/**
 	 * Describes how a segment's data bits are interpreted.
 	 */
 	public enum Mode {
-		
+
 		/*-- Constants --*/
-		
+
 		NUMERIC     (0x1, 10, 12, 14),
 		ALPHANUMERIC(0x2,  9, 11, 13),
 		BYTE        (0x4,  8, 16, 16),
 		KANJI       (0x8,  8, 10, 12),
 		ECI         (0x7,  0,  0,  0);
-		
-		
+
+
 		/*-- Fields --*/
-		
+
 		// The mode indicator bits, which is a uint4 value (range 0 to 15).
 		final int modeBits;
-		
+
 		// Number of character count bits for three different version ranges.
 		private final int[] numBitsCharCount;
-		
-		
+
+
 		/*-- Constructor --*/
-		
+
 		private Mode(int mode, int... ccbits) {
 			modeBits = mode;
 			numBitsCharCount = ccbits;
 		}
-		
-		
+
+
 		/*-- Method --*/
-		
+
 		// Returns the bit width of the character count field for a segment in this mode
 		// in a QR Code at the given version number. The result is in the range [0, 16].
 		int numCharCountBits(int ver) {
 			assert ProsperoQrCode.MIN_VERSION <= ver && ver <= ProsperoQrCode.MAX_VERSION;
 			return numBitsCharCount[(ver + 7) / 17];
 		}
-		
+
 	}
-	
+
 }

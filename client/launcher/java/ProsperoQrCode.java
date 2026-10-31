@@ -1,9 +1,9 @@
-/* 
+/*
  * QR Code generator library (Java)
- * 
+ *
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -50,9 +50,9 @@ import java.util.Objects;
  * @see ProsperoQrSegment
  */
 public final class ProsperoQrCode {
-	
+
 	/*---- Static factory functions (high level) ----*/
-	
+
 	/**
 	 * Returns a QR Code representing the specified Unicode text string at the specified error correction level.
 	 * As a conservative upper bound, this function is guaranteed to succeed for strings that have 738 or fewer
@@ -72,8 +72,8 @@ public final class ProsperoQrCode {
 		List<ProsperoQrSegment> segs = ProsperoQrSegment.makeSegments(text);
 		return encodeSegments(segs, ecl);
 	}
-	
-	
+
+
 	/**
 	 * Returns a QR Code representing the specified binary data at the specified error correction level.
 	 * This function always encodes using the binary segment mode, not any text mode. The maximum number of
@@ -92,10 +92,10 @@ public final class ProsperoQrCode {
 		ProsperoQrSegment seg = ProsperoQrSegment.makeBytes(data);
 		return encodeSegments(Arrays.asList(seg), ecl);
 	}
-	
-	
+
+
 	/*---- Static factory functions (mid level) ----*/
-	
+
 	/**
 	 * Returns a QR Code representing the specified segments at the specified error correction
 	 * level. The smallest possible QR Code version is automatically chosen for the output. The ECC level
@@ -114,8 +114,8 @@ public final class ProsperoQrCode {
 	public static ProsperoQrCode encodeSegments(List<ProsperoQrSegment> segs, Ecc ecl) {
 		return encodeSegments(segs, ecl, MIN_VERSION, MAX_VERSION, -1, true);
 	}
-	
-	
+
+
 	/**
 	 * Returns a QR Code representing the specified segments with the specified encoding parameters.
 	 * The smallest possible QR Code version within the specified range is automatically
@@ -145,7 +145,7 @@ public final class ProsperoQrCode {
 		Objects.requireNonNull(ecl);
 		if (!(MIN_VERSION <= minVersion && minVersion <= maxVersion && maxVersion <= MAX_VERSION) || mask < -1 || mask > 7)
 			throw new IllegalArgumentException("Invalid value");
-		
+
 		// Find the minimal version number to use
 		int version, dataUsedBits;
 		for (version = minVersion; ; version++) {
@@ -161,13 +161,13 @@ public final class ProsperoQrCode {
 			}
 		}
 		assert dataUsedBits != -1;
-		
+
 		// Increase the error correction level while the data still fits in the current version number
 		for (Ecc newEcl : Ecc.values()) {  // From low to high
 			if (boostEcl && dataUsedBits <= getNumDataCodewords(version, newEcl) * 8)
 				ecl = newEcl;
 		}
-		
+
 		// Concatenate all segments to create the data bit string
 		ProsperoBitBuffer bb = new ProsperoBitBuffer();
 		for (ProsperoQrSegment seg : segs) {
@@ -176,62 +176,62 @@ public final class ProsperoQrCode {
 			bb.appendData(seg.data);
 		}
 		assert bb.bitLength() == dataUsedBits;
-		
+
 		// Add terminator and pad up to a byte if applicable
 		int dataCapacityBits = getNumDataCodewords(version, ecl) * 8;
 		assert bb.bitLength() <= dataCapacityBits;
 		bb.appendBits(0, Math.min(4, dataCapacityBits - bb.bitLength()));
 		bb.appendBits(0, (8 - bb.bitLength() % 8) % 8);
 		assert bb.bitLength() % 8 == 0;
-		
+
 		// Pad with alternating bytes until data capacity is reached
 		for (int padByte = 0xEC; bb.bitLength() < dataCapacityBits; padByte ^= 0xEC ^ 0x11)
 			bb.appendBits(padByte, 8);
-		
+
 		// Pack bits into bytes in big endian
 		byte[] dataCodewords = new byte[bb.bitLength() / 8];
 		for (int i = 0; i < bb.bitLength(); i++)
 			dataCodewords[i >>> 3] |= bb.getBit(i) << (7 - (i & 7));
-		
+
 		// Create the QR Code object
 		return new ProsperoQrCode(version, ecl, dataCodewords, mask);
 	}
-	
-	
-	
+
+
+
 	/*---- Instance fields ----*/
-	
+
 	// Public immutable scalar parameters:
-	
+
 	/** The version number of this QR Code, which is between 1 and 40 (inclusive).
 	 * This determines the size of this barcode. */
 	public final int version;
-	
+
 	/** The width and height of this QR Code, measured in modules, between
 	 * 21 and 177 (inclusive). This is equal to version &#xD7; 4 + 17. */
 	public final int size;
-	
+
 	/** The error correction level used in this QR Code, which is not {@code null}. */
 	public final Ecc errorCorrectionLevel;
-	
+
 	/** The index of the mask pattern used in this QR Code, which is between 0 and 7 (inclusive).
 	 * <p>Even if a QR Code is created with automatic masking requested (mask =
 	 * &#x2212;1), the resulting object still has a mask value between 0 and 7. */
 	public final int mask;
-	
+
 	// Private grids of modules/pixels, with dimensions of size*size:
-	
+
 	// The modules of this QR Code (false = light, true = dark).
 	// Immutable after constructor finishes. Accessed through getModule().
 	private boolean[][] modules;
-	
+
 	// Indicates function modules that are not subjected to masking. Discarded when constructor finishes.
 	private boolean[][] isFunction;
-	
-	
-	
+
+
+
 	/*---- Constructor (low level) ----*/
-	
+
 	/**
 	 * Constructs a QR Code with the specified version number,
 	 * error correction level, data codeword bytes, and mask number.
@@ -257,12 +257,12 @@ public final class ProsperoQrCode {
 		Objects.requireNonNull(dataCodewords);
 		modules    = new boolean[size][size];  // Initially all light
 		isFunction = new boolean[size][size];
-		
+
 		// Compute ECC, draw modules, do masking
 		drawFunctionPatterns();
 		byte[] allCodewords = addEccAndInterleave(dataCodewords);
 		drawCodewords(allCodewords);
-		
+
 		// Do masking
 		if (msk == -1) {  // Automatically choose best mask
 			int minPenalty = Integer.MAX_VALUE;
@@ -281,14 +281,14 @@ public final class ProsperoQrCode {
 		mask = msk;
 		applyMask(msk);  // Apply the final choice of mask
 		drawFormatBits(msk);  // Overwrite old format bits
-		
+
 		isFunction = null;
 	}
-	
-	
-	
+
+
+
 	/*---- Public instance methods ----*/
-	
+
 	/**
 	 * Returns the color of the module (pixel) at the specified coordinates, which is {@code false}
 	 * for light or {@code true} for dark. The top left corner has the coordinates (x=0, y=0).
@@ -301,11 +301,11 @@ public final class ProsperoQrCode {
 	public boolean getModule(int x, int y) {
 		return 0 <= x && x < size && 0 <= y && y < size && modules[y][x];
 	}
-	
-	
-	
+
+
+
 	/*---- Private helper methods for constructor: Drawing function modules ----*/
-	
+
 	// Reads this object's version field, and draws and marks all function modules.
 	private void drawFunctionPatterns() {
 		// Draw horizontal and vertical timing patterns
@@ -313,12 +313,12 @@ public final class ProsperoQrCode {
 			setFunctionModule(6, i, i % 2 == 0);
 			setFunctionModule(i, 6, i % 2 == 0);
 		}
-		
+
 		// Draw 3 finder patterns (all corners except bottom right; overwrites some timing modules)
 		drawFinderPattern(3, 3);
 		drawFinderPattern(size - 4, 3);
 		drawFinderPattern(3, size - 4);
-		
+
 		// Draw numerous alignment patterns
 		int[] alignPatPos = getAlignmentPatternPositions();
 		int numAlign = alignPatPos.length;
@@ -329,13 +329,13 @@ public final class ProsperoQrCode {
 					drawAlignmentPattern(alignPatPos[i], alignPatPos[j]);
 			}
 		}
-		
+
 		// Draw configuration data
 		drawFormatBits(0);  // Dummy mask value; overwritten later in the constructor
 		drawVersion();
 	}
-	
-	
+
+
 	// Draws two copies of the format bits (with its own error correction code)
 	// based on the given mask and this object's error correction level field.
 	private void drawFormatBits(int msk) {
@@ -346,7 +346,7 @@ public final class ProsperoQrCode {
 			rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
 		int bits = (data << 10 | rem) ^ 0x5412;  // uint15
 		assert bits >>> 15 == 0;
-		
+
 		// Draw first copy
 		for (int i = 0; i <= 5; i++)
 			setFunctionModule(8, i, getBit(bits, i));
@@ -355,7 +355,7 @@ public final class ProsperoQrCode {
 		setFunctionModule(7, 8, getBit(bits, 8));
 		for (int i = 9; i < 15; i++)
 			setFunctionModule(14 - i, 8, getBit(bits, i));
-		
+
 		// Draw second copy
 		for (int i = 0; i < 8; i++)
 			setFunctionModule(size - 1 - i, 8, getBit(bits, i));
@@ -363,21 +363,21 @@ public final class ProsperoQrCode {
 			setFunctionModule(8, size - 15 + i, getBit(bits, i));
 		setFunctionModule(8, size - 8, true);  // Always dark
 	}
-	
-	
+
+
 	// Draws two copies of the version bits (with its own error correction code),
 	// based on this object's version field, iff 7 <= version <= 40.
 	private void drawVersion() {
 		if (version < 7)
 			return;
-		
+
 		// Calculate error correction code and pack bits
 		int rem = version;  // version is uint6, in the range [7, 40]
 		for (int i = 0; i < 12; i++)
 			rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
 		int bits = version << 12 | rem;  // uint18
 		assert bits >>> 18 == 0;
-		
+
 		// Draw two copies
 		for (int i = 0; i < 18; i++) {
 			boolean bit = getBit(bits, i);
@@ -387,8 +387,8 @@ public final class ProsperoQrCode {
 			setFunctionModule(b, a, bit);
 		}
 	}
-	
-	
+
+
 	// Draws a 9*9 finder pattern including the border separator,
 	// with the center module at (x, y). Modules can be out of bounds.
 	private void drawFinderPattern(int x, int y) {
@@ -401,8 +401,8 @@ public final class ProsperoQrCode {
 			}
 		}
 	}
-	
-	
+
+
 	// Draws a 5*5 alignment pattern, with the center module
 	// at (x, y). All modules must be in bounds.
 	private void drawAlignmentPattern(int x, int y) {
@@ -411,32 +411,32 @@ public final class ProsperoQrCode {
 				setFunctionModule(x + dx, y + dy, Math.max(Math.abs(dx), Math.abs(dy)) != 1);
 		}
 	}
-	
-	
+
+
 	// Sets the color of a module and marks it as a function module.
 	// Only used by the constructor. Coordinates must be in bounds.
 	private void setFunctionModule(int x, int y, boolean isDark) {
 		modules[y][x] = isDark;
 		isFunction[y][x] = true;
 	}
-	
-	
+
+
 	/*---- Private helper methods for constructor: Codewords and masking ----*/
-	
+
 	// Returns a new byte string representing the given data with the appropriate error correction
 	// codewords appended to it, based on this object's version and error correction level.
 	private byte[] addEccAndInterleave(byte[] data) {
 		Objects.requireNonNull(data);
 		if (data.length != getNumDataCodewords(version, errorCorrectionLevel))
 			throw new IllegalArgumentException();
-		
+
 		// Calculate parameter numbers
 		int numBlocks = NUM_ERROR_CORRECTION_BLOCKS[errorCorrectionLevel.ordinal()][version];
 		int blockEccLen = ECC_CODEWORDS_PER_BLOCK  [errorCorrectionLevel.ordinal()][version];
 		int rawCodewords = getNumRawDataModules(version) / 8;
 		int numShortBlocks = numBlocks - rawCodewords % numBlocks;
 		int shortBlockLen = rawCodewords / numBlocks;
-		
+
 		// Split data into blocks and append ECC to each block
 		byte[][] blocks = new byte[numBlocks][];
 		byte[] rsDiv = reedSolomonComputeDivisor(blockEccLen);
@@ -448,7 +448,7 @@ public final class ProsperoQrCode {
 			System.arraycopy(ecc, 0, block, block.length - blockEccLen, ecc.length);
 			blocks[i] = block;
 		}
-		
+
 		// Interleave (not concatenate) the bytes from every block into a single sequence
 		byte[] result = new byte[rawCodewords];
 		for (int i = 0, k = 0; i < blocks[0].length; i++) {
@@ -462,15 +462,15 @@ public final class ProsperoQrCode {
 		}
 		return result;
 	}
-	
-	
+
+
 	// Draws the given sequence of 8-bit codewords (data and error correction) onto the entire
 	// data area of this QR Code. Function modules need to be marked off before this is called.
 	private void drawCodewords(byte[] data) {
 		Objects.requireNonNull(data);
 		if (data.length != getNumRawDataModules(version) / 8)
 			throw new IllegalArgumentException();
-		
+
 		int i = 0;  // Bit index into the data
 		// Do the funny zigzag scan
 		for (int right = size - 1; right >= 1; right -= 2) {  // Index of right column in each column pair
@@ -492,8 +492,8 @@ public final class ProsperoQrCode {
 		}
 		assert i == data.length * 8;
 	}
-	
-	
+
+
 	// XORs the codeword modules in this QR Code with the given mask pattern.
 	// The function modules must be marked and the codeword bits must be drawn
 	// before masking. Due to the arithmetic of XOR, calling applyMask() with
@@ -520,13 +520,13 @@ public final class ProsperoQrCode {
 			}
 		}
 	}
-	
-	
+
+
 	// Calculates and returns the penalty score based on state of this QR Code's current modules.
 	// This is used by the automatic mask choice algorithm to find the mask pattern that yields the lowest score.
 	private int getPenaltyScore() {
 		int result = 0;
-		
+
 		// Adjacent modules in row having same color, and finder-like patterns
 		for (int y = 0; y < size; y++) {
 			boolean runColor = false;
@@ -571,7 +571,7 @@ public final class ProsperoQrCode {
 			}
 			result += finderPenaltyTerminateAndCount(runColor, runY, runHistory) * PENALTY_N3;
 		}
-		
+
 		// 2*2 blocks of modules having same color
 		for (int y = 0; y < size - 1; y++) {
 			for (int x = 0; x < size - 1; x++) {
@@ -582,7 +582,7 @@ public final class ProsperoQrCode {
 					result += PENALTY_N2;
 			}
 		}
-		
+
 		// Balance of dark and light modules
 		int dark = 0;
 		for (boolean[] row : modules) {
@@ -599,11 +599,11 @@ public final class ProsperoQrCode {
 		assert 0 <= result && result <= 2568888;  // Non-tight upper bound based on default values of PENALTY_N1, ..., N4
 		return result;
 	}
-	
-	
-	
+
+
+
 	/*---- Private helper functions ----*/
-	
+
 	// Returns an ascending list of positions of alignment patterns for this version number.
 	// Each position is in the range [0,177), and are used on both the x and y axes.
 	// This could be implemented as lookup table of 40 variable-length lists of unsigned bytes.
@@ -620,15 +620,15 @@ public final class ProsperoQrCode {
 			return result;
 		}
 	}
-	
-	
+
+
 	// Returns the number of data bits that can be stored in a QR Code of the given version number, after
 	// all function modules are excluded. This includes remainder bits, so it might not be a multiple of 8.
 	// The result is in the range [208, 29648]. This could be implemented as a 40-entry lookup table.
 	private static int getNumRawDataModules(int ver) {
 		if (ver < MIN_VERSION || ver > MAX_VERSION)
 			throw new IllegalArgumentException("Version number out of range");
-		
+
 		int size = ver * 4 + 17;
 		int result = size * size;   // Number of modules in the whole QR Code square
 		result -= 8 * 8 * 3;        // Subtract the three finders with separators
@@ -646,8 +646,8 @@ public final class ProsperoQrCode {
 		assert 208 <= result && result <= 29648;
 		return result;
 	}
-	
-	
+
+
 	// Returns a Reed-Solomon ECC generator polynomial for the given degree. This could be
 	// implemented as a lookup table over all possible parameter values, instead of as an algorithm.
 	private static byte[] reedSolomonComputeDivisor(int degree) {
@@ -657,7 +657,7 @@ public final class ProsperoQrCode {
 		// For example the polynomial x^3 + 255x^2 + 8x + 93 is stored as the uint8 array {255, 8, 93}.
 		byte[] result = new byte[degree];
 		result[degree - 1] = 1;  // Start off with the monomial x^0
-		
+
 		// Compute the product polynomial (x - r^0) * (x - r^1) * (x - r^2) * ... * (x - r^{degree-1}),
 		// and drop the highest monomial term which is always 1x^degree.
 		// Note that r = 0x02, which is a generator element of this field GF(2^8/0x11D).
@@ -673,8 +673,8 @@ public final class ProsperoQrCode {
 		}
 		return result;
 	}
-	
-	
+
+
 	// Returns the Reed-Solomon error correction codeword for the given data and divisor polynomials.
 	private static byte[] reedSolomonComputeRemainder(byte[] data, byte[] divisor) {
 		Objects.requireNonNull(data);
@@ -689,8 +689,8 @@ public final class ProsperoQrCode {
 		}
 		return result;
 	}
-	
-	
+
+
 	// Returns the product of the two given field elements modulo GF(2^8/0x11D). The arguments and result
 	// are unsigned 8-bit integers. This could be implemented as a lookup table of 256*256 entries of uint8.
 	private static int reedSolomonMultiply(int x, int y) {
@@ -704,8 +704,8 @@ public final class ProsperoQrCode {
 		assert z >>> 8 == 0;
 		return z;
 	}
-	
-	
+
+
 	// Returns the number of 8-bit data (i.e. not error correction) codewords contained in any
 	// QR Code of the given version number and error correction level, with remainder bits discarded.
 	// This stateless pure function could be implemented as a (40*4)-cell lookup table.
@@ -714,8 +714,8 @@ public final class ProsperoQrCode {
 			- ECC_CODEWORDS_PER_BLOCK    [ecl.ordinal()][ver]
 			* NUM_ERROR_CORRECTION_BLOCKS[ecl.ordinal()][ver];
 	}
-	
-	
+
+
 	// Can only be called immediately after a light run is added, and
 	// returns either 0, 1, or 2. A helper function for getPenaltyScore().
 	private int finderPenaltyCountPatterns(int[] runHistory) {
@@ -725,8 +725,8 @@ public final class ProsperoQrCode {
 		return (core && runHistory[0] >= n * 4 && runHistory[6] >= n ? 1 : 0)
 		     + (core && runHistory[6] >= n * 4 && runHistory[0] >= n ? 1 : 0);
 	}
-	
-	
+
+
 	// Must be called at the end of a line (row or column) of modules. A helper function for getPenaltyScore().
 	private int finderPenaltyTerminateAndCount(boolean currentRunColor, int currentRunLength, int[] runHistory) {
 		if (currentRunColor) {  // Terminate dark run
@@ -737,8 +737,8 @@ public final class ProsperoQrCode {
 		finderPenaltyAddHistory(currentRunLength, runHistory);
 		return finderPenaltyCountPatterns(runHistory);
 	}
-	
-	
+
+
 	// Pushes the given value to the front and drops the last value. A helper function for getPenaltyScore().
 	private void finderPenaltyAddHistory(int currentRunLength, int[] runHistory) {
 		if (runHistory[0] == 0)
@@ -746,30 +746,30 @@ public final class ProsperoQrCode {
 		System.arraycopy(runHistory, 0, runHistory, 1, runHistory.length - 1);
 		runHistory[0] = currentRunLength;
 	}
-	
-	
+
+
 	// Returns true iff the i'th bit of x is set to 1.
 	static boolean getBit(int x, int i) {
 		return ((x >>> i) & 1) != 0;
 	}
-	
-	
+
+
 	/*---- Constants and tables ----*/
-	
+
 	/** The minimum version number  (1) supported in the QR Code Model 2 standard. */
 	public static final int MIN_VERSION =  1;
-	
+
 	/** The maximum version number (40) supported in the QR Code Model 2 standard. */
 	public static final int MAX_VERSION = 40;
-	
-	
+
+
 	// For use in getPenaltyScore(), when evaluating which mask is best.
 	private static final int PENALTY_N1 =  3;
 	private static final int PENALTY_N2 =  3;
 	private static final int PENALTY_N3 = 40;
 	private static final int PENALTY_N4 = 10;
-	
-	
+
+
 	private static final byte[][] ECC_CODEWORDS_PER_BLOCK = {
 		// Version: (note that index 0 is for padding, and is set to an illegal value)
 		//0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
@@ -778,7 +778,7 @@ public final class ProsperoQrCode {
 		{-1, 13, 22, 18, 26, 18, 24, 18, 22, 20, 24, 28, 26, 24, 20, 30, 24, 28, 28, 26, 30, 28, 30, 30, 30, 30, 28, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},  // Quartile
 		{-1, 17, 28, 22, 16, 22, 28, 26, 26, 24, 28, 24, 28, 22, 24, 24, 30, 28, 28, 26, 28, 30, 24, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},  // High
 	};
-	
+
 	private static final byte[][] NUM_ERROR_CORRECTION_BLOCKS = {
 		// Version: (note that index 0 is for padding, and is set to an illegal value)
 		//0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40    Error correction level
@@ -787,11 +787,11 @@ public final class ProsperoQrCode {
 		{-1, 1, 1, 2, 2, 4, 4, 6, 6, 8, 8,  8, 10, 12, 16, 12, 17, 16, 18, 21, 20, 23, 23, 25, 27, 29, 34, 34, 35, 38, 40, 43, 45, 48, 51, 53, 56, 59, 62, 65, 68},  // Quartile
 		{-1, 1, 1, 2, 4, 4, 4, 5, 6, 8, 8, 11, 11, 16, 16, 18, 16, 19, 21, 25, 25, 25, 34, 30, 32, 35, 37, 40, 42, 45, 48, 51, 54, 57, 60, 63, 66, 70, 74, 77, 81},  // High
 	};
-	
-	
-	
+
+
+
 	/*---- Public helper enumeration ----*/
-	
+
 	/**
 	 * The error correction level in a QR Code symbol.
 	 */
@@ -802,14 +802,14 @@ public final class ProsperoQrCode {
 		/** The QR Code can tolerate about 15% erroneous codewords. */ MEDIUM(0),
 		/** The QR Code can tolerate about 25% erroneous codewords. */ QUARTILE(3),
 		/** The QR Code can tolerate about 30% erroneous codewords. */ HIGH(2);
-		
+
 		// In the range 0 to 3 (unsigned 2-bit integer).
 		final int formatBits;
-		
+
 		// Constructor.
 		private Ecc(int fb) {
 			formatBits = fb;
 		}
 	}
-	
+
 }

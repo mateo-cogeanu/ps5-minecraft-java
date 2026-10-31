@@ -2,7 +2,7 @@
   "repository": "https://github.com/nayuki/QR-Code-generator",
   "commit": "bcfe1b018cec5f1f91b5705eca5bb4cdd34e9f8d",
   "license": "MIT; retained in each source",
-  "changes": "Default package and Prospero class prefixes for existing flat Java source packaging",
+  "changes": "Default package and Prospero class prefixes for existing flat Java source packaging; trailing whitespace normalized",
   "upstream_files": [
     {
       "file": "java/src/main/java/io/nayuki/qrcodegen/QrCode.java",

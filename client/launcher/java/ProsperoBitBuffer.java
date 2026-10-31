@@ -1,9 +1,9 @@
-/* 
+/*
  * QR Code generator library (Java)
- * 
+ *
  * Copyright (c) Project Nayuki. (MIT License)
  * https://www.nayuki.io/page/qr-code-generator-library
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
@@ -31,17 +31,17 @@ import java.util.Objects;
  * An appendable sequence of bits (0s and 1s). Mainly used by {@link ProsperoQrSegment}.
  */
 public final class ProsperoBitBuffer implements Cloneable {
-	
+
 	/*---- Fields ----*/
-	
+
 	private BitSet data;
-	
+
 	private int bitLength;  // Non-negative
-	
-	
-	
+
+
+
 	/*---- Constructor ----*/
-	
+
 	/**
 	 * Constructs an empty bit buffer (length 0).
 	 */
@@ -49,11 +49,11 @@ public final class ProsperoBitBuffer implements Cloneable {
 		data = new BitSet();
 		bitLength = 0;
 	}
-	
-	
-	
+
+
+
 	/*---- Methods ----*/
-	
+
 	/**
 	 * Returns the length of this sequence, which is a non-negative value.
 	 * @return the length of this sequence
@@ -62,8 +62,8 @@ public final class ProsperoBitBuffer implements Cloneable {
 		assert bitLength >= 0;
 		return bitLength;
 	}
-	
-	
+
+
 	/**
 	 * Returns the bit at the specified index, yielding 0 or 1.
 	 * @param index the index to get the bit at
@@ -75,8 +75,8 @@ public final class ProsperoBitBuffer implements Cloneable {
 			throw new IndexOutOfBoundsException();
 		return data.get(index) ? 1 : 0;
 	}
-	
-	
+
+
 	/**
 	 * Appends the specified number of low-order bits of the specified value to this
 	 * buffer. Requires 0 &#x2264; len &#x2264; 31 and 0 &#x2264; val &lt; 2<sup>len</sup>.
@@ -94,8 +94,8 @@ public final class ProsperoBitBuffer implements Cloneable {
 		for (int i = len - 1; i >= 0; i--, bitLength++)  // Append bit by bit
 			data.set(bitLength, ProsperoQrCode.getBit(val, i));
 	}
-	
-	
+
+
 	/**
 	 * Appends the content of the specified bit buffer to this buffer.
 	 * @param bb the bit buffer whose data to append (not {@code null})
@@ -110,8 +110,8 @@ public final class ProsperoBitBuffer implements Cloneable {
 		for (int i = 0; i < bb.bitLength; i++, bitLength++)  // Append bit by bit
 			data.set(bitLength, bb.data.get(i));
 	}
-	
-	
+
+
 	/**
 	 * Returns a new copy of this buffer.
 	 * @return a new copy of this buffer (not {@code null})
@@ -125,5 +125,5 @@ public final class ProsperoBitBuffer implements Cloneable {
 			throw new AssertionError(e);
 		}
 	}
-	
+
 }
