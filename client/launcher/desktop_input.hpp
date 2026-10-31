@@ -24,7 +24,7 @@ inline DesktopHit desktop_hit(int page,int x,int y,int first,int count,int slide
  if(page==3&&box(1140,366,700,76))return {3,0};
  if(page==4){for(int i=0;i<(offline?4:3);i++)if(box(760,505+i*100,1080,76))return {3,i};}
  if(page==16){for(int i=0;i<3;i++)if(box(1000,380+i*110,820,86))return {3,i};return {};}
- if(page==5){if(box(110,805,530,70))return {3,9};if(box(760,820,1080,76))return {3,8};if(box(760,310,1080,96))return {3,0};if(box(760,420,1080,96))return {3,1};int rows[]={2,3,4,7,5,6};for(int i=0;i<6;i++)if(box(760+i%2*560,535+i/2*95,520,76))return {3,rows[i]};}
+ if(page==5){if(box(760,310,1080,96))return {3,0};if(box(760,420,1080,96))return {3,1};int rows[]={2,3,4,7,8,9,5,6};for(int i=0;i<8;i++)if(box(760+i%2*560,535+i/2*95,520,76))return {3,rows[i]};}
  if(page==7){if(box(240,773,330,76))return {3,1};if(box(680,773,430,76))return {3,0};}
  if(page==11){if(box(78,850,330,76))return {3,1};if(box(470,850,610,76))return {3,0};}
  if(page==14){if(box(760,740,520,76))return {3,0};if(box(1320,740,520,76))return {3,1};}

@@ -11,9 +11,11 @@ import com.google.gson.*;
 
 /** Menu-scoped administrative service. One worker/socket/upload; no diagnostics sharing. */
 final class ProsperoWeb implements AutoCloseable {
+ static final long PAIRING_MS=5*60_000L;
  static final long MAX_UPLOAD=128L*1024*1024, SESSION_MS=15*60_000L;
  interface Owner {
   Object snapshot()throws Exception;
+  default String selectedInstance(){return "";}
   void begin()throws Exception;
   void end(boolean changed);
  }
@@ -25,7 +27,7 @@ final class ProsperoWeb implements AutoCloseable {
  private final LongSupplier clock;private final SecureRandom random=new SecureRandom();
  private final ServerSocket server;private volatile Socket active;private final Thread thread;
  private volatile boolean closed;private volatile Status status;
- private volatile String pairing;private volatile String session="";private volatile long expires;private long attemptWindow;private int attempts;
+ private volatile long pairingExpires;private volatile String pairing;private volatile String session="";private volatile long expires;private long attemptWindow;private int attempts;
  private volatile List<String> hosts=List.of();private long refreshAt;
  ProsperoWeb(ProsperoLibrary library,Owner owner,int port)throws IOException {this(library,owner,port,ProsperoWeb::localAddresses,System::currentTimeMillis);}
  ProsperoWeb(ProsperoLibrary library,Owner owner,int port,Addresses discovery,LongSupplier clock)throws IOException {
@@ -33,14 +35,24 @@ final class ProsperoWeb implements AutoCloseable {
  }
  ProsperoWeb(ProsperoLibrary library,Owner owner,int port,Addresses discovery,LongSupplier clock,UploadSink sink)throws IOException {
   this.library=library;this.owner=owner;this.discovery=discovery;this.clock=clock;this.sink=sink;
-  pairing=secret();server=new ServerSocket();
+  pairing=shortCode();pairingExpires=clock.getAsLong()+PAIRING_MS;server=new ServerSocket();
   try{server.setReuseAddress(true);server.bind(new InetSocketAddress(port),4);server.setSoTimeout(1000);}catch(IOException failed){server.close();throw failed;}
   status=new Status("Discovering local addresses",List.of(),server.getLocalPort());
   thread=new Thread(this::serve,"ProsperoCraft local manager");thread.setDaemon(true);thread.start();
  }
- String pairing(){return pairing;}
+ String pairing(){renewPairing();return pairing;}
+ private synchronized void renewPairing(){if(!closed&&clock.getAsLong()>=pairingExpires){pairingExpires=clock.getAsLong()+PAIRING_MS;pairing=shortCode();}}
  Status status(){return status;}
  int port(){return server.getLocalPort();}
+ static String normalizeCode(String value){
+  if(value==null||!value.matches("[A-Za-z2-9]{3}-?[A-Za-z2-9]{3}"))return "";
+  return value.replace("-","").toUpperCase(Locale.ROOT);
+ }
+ private String shortCode(){
+  final String alphabet="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";String code;
+  do{StringBuilder b=new StringBuilder();for(int n=0;n<6;n++)b.append(alphabet.charAt(random.nextInt(alphabet.length())));code=b.toString();}while(!code.matches(".*[A-Z].*")||!code.matches(".*[2-9].*")||(code.substring(0,3)+"-"+code.substring(3)).equals(pairing));
+  return code.substring(0,3)+"-"+code.substring(3);
+ }
  private String secret(){byte[] b=new byte[16];random.nextBytes(b);return HexFormat.of().formatHex(b);}
  static List<String> localAddresses()throws SocketException {
   var found=new TreeSet<String>();var interfaces=NetworkInterface.getNetworkInterfaces();
@@ -49,7 +61,7 @@ final class ProsperoWeb implements AutoCloseable {
   return List.copyOf(found);
  }
  private void refresh(){
-  long now=clock.getAsLong();if(now<refreshAt)return;refreshAt=now+3000;
+  long now=clock.getAsLong();renewPairing();if(now<refreshAt)return;refreshAt=now+3000;
   try{var ips=discovery.get();if(ips.size()>16)ips=ips.subList(0,16);var current=List.copyOf(ips);
    // Address removal revokes a paired browser. Never keep stale QR addresses.
    if(!status.addresses().equals(current)){session="";expires=0;}
@@ -81,10 +93,14 @@ final class ProsperoWeb implements AutoCloseable {
    if(method.equals("GET"))require(length==0,400,"Unexpected body");
    if(!method.equals("GET")){require(("http://"+host).equals(headers.get("origin")),403,"Open this page directly from the launcher address");require("1".equals(headers.get("x-prospero-request")),403,"Browser request required");}
    if(method.equals("GET")&&path.matches("/icon/[0-9]{1,2}")){int icon=Integer.parseInt(path.substring(6));require(icon<ProsperoWebIcons.PNG.length,404,"Icon unavailable");respondBytes(out,200,"image/png",Base64.getDecoder().decode(ProsperoWebIcons.PNG[icon]),"");return;}
+   if(method.equals("GET")&&path.equals("/i")){
+    String id=owner.selectedInstance();require(id.matches("[a-f0-9-]{36}")&&library.instances().stream().anyMatch(i->i.id.equals(id)),404,"Selected instance unavailable");
+    respond(out,302,"text/plain","Opening your instance","Location: /instance/"+id+"\r\n");return;
+   }
    if(method.equals("GET")&&(path.equals("/")||path.matches("/instance/[a-f0-9-]{36}"))){respond(out,200,"text/html; charset=utf-8",ProsperoWebPage.HTML,"");return;}
    if(method.equals("POST")&&path.equals("/pair")){
     require(length==0,400,"Unexpected pairing body");long now=clock.getAsLong();if(now-attemptWindow>=60_000){attemptWindow=now;attempts=0;}require(++attempts<=5,429,"Too many attempts. Wait one minute");
-    String supplied=headers.getOrDefault("x-pair-code","");require(MessageDigest.isEqual(pairing.getBytes(StandardCharsets.US_ASCII),supplied.getBytes(StandardCharsets.US_ASCII)),401,"Pairing code did not match");
+    require(now<pairingExpires,401,"Pairing code expired. Use the new code on your PS5");String supplied=normalizeCode(headers.getOrDefault("x-pair-code",""));require(!closed&&!supplied.isEmpty()&&MessageDigest.isEqual(normalizeCode(pairing).getBytes(StandardCharsets.US_ASCII),supplied.getBytes(StandardCharsets.US_ASCII)),401,"Pairing code did not match");
     session=secret();expires=now+SESSION_MS;cookie="Set-Cookie: prospero="+session+"; HttpOnly; SameSite=Strict; Path=/; Max-Age=900\r\n";
     respond(out,200,"application/json","{}",cookie);return;
    }

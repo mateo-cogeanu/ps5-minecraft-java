@@ -1,5 +1,11 @@
 # Changelog
 
+## 01.000.171 — local readable pairing and instance layout repair
+
+- Six-character case-insensitive pairing with automatic hyphen and five-minute rotation; short selected-instance `/i` address.
+- Put Microphone/Browser uploads in the action grid and keep Done/Delete on the bottom; remove overlapping pairing footer and refresh microphone navigation.
+- Integrate runtime-owned genuine LLVM compiler-TLS exception globals after170 voice-chat playback abort identifies native key-set failure. Underlying AudioOut refusal and exact PS5 world/voice validation remain pending. [Test guide](docs/client-local-management-171.md). No release/Store update.
+
 ## 01.000.170 — local launcher-style web UI and opt-in native microphone
 
 - Replace the initial manager layout with native launcher icon cards and themed Mods/Resource packs/Shaders/Schematics upload sections, keeping the paired service and bounded storage rules.

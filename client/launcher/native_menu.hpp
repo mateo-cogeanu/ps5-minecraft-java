@@ -220,7 +220,7 @@ inline void compose(Canvas& c) noexcept {
   label(c,70,185+slide,page==1?"A world of your own.":"Make it yours.",64);label(c,75,269+slide,page==1?"One instance. Its own settings, worlds and memories.":"Your worlds stay right where they are.",24,0x91ad9b);
   c.rounded(70,338+slide,620,548,28,ink(0x10221c));block(c,275,402+slide,204,page==1?number(24):number(18));title(c,105,690+slide,page==1?fields[22].data():fields[16].data(),42,540);label(c,108,761+slide,"JAVA EDITION / INSTANCE",24,0x8db69a);
   if(page==1){row_control(c,320+slide,"VERSION",fields[23].data(),row==0);row_control(c,430+slide,"LOADER",fields[82].data(),row==1,true);row_control(c,540+slide,"NAME",fields[22].data(),row==2);row_control(c,650+slide,"ICON","Choose instance icon",row==3);action(c,760,774+slide,1080,"CREATE & DOWNLOAD",row==4,true);wrap(c,790,884+slide,fields[70].data(),1000,1);}
-  else{row_control(c,310+slide,"INSTANCE NAME",fields[16].data(),row==0);row_control(c,420+slide,"INSTANCE ICON","Choose instance icon",row==1);action(c,760,535+slide,520,"MODS",row==2);action(c,1320,535+slide,520,"SHADERS",row==3);action(c,760,630+slide,520,"RESOURCE PACKS",row==4);action(c,1320,630+slide,520,"DUPLICATE INSTANCE",row==7);action(c,760,725+slide,520,"DONE",row==5,true);action(c,1320,725+slide,520,"DELETE INSTANCE",row==6);action(c,760,820+slide,1080,"MANAGE FROM PHONE / BROWSER",row==8);action(c,110,805+slide,530,"MICROPHONE",row==9);}
+  else{row_control(c,310+slide,"INSTANCE NAME",fields[16].data(),row==0);row_control(c,420+slide,"INSTANCE ICON","Choose instance icon",row==1);action(c,760,535+slide,520,"MODS",row==2);action(c,1320,535+slide,520,"SHADERS",row==3);action(c,760,630+slide,520,"RESOURCE PACKS",row==4);action(c,1320,630+slide,520,"DUPLICATE INSTANCE",row==7);action(c,760,820+slide,520,"DONE",row==5,true);action(c,1320,820+slide,520,"DELETE INSTANCE",row==6);action(c,760,725+slide,520,"BROWSER UPLOADS",row==8);action(c,1320,725+slide,520,"MICROPHONE",row==9);}
  }else if(page==16){
   label(c,70,185,"Voice chat microphone",54);wrap(c,75,290,"Experimental PS5 system input. Choose DualSense microphone in PS5 system settings; a headset may change that route. This app never unmutes your microphone.",850,4);
   wrap(c,75,510,"Test: only your own speech, with consent. Speak for five seconds, then repeat while muted. No recording is saved. Native capture is not console-validated yet.",850,5);
@@ -232,11 +232,13 @@ inline void compose(Canvas& c) noexcept {
   if(fields[108][0]){
    const char* matrix=fields[102].data();int size=std::atoi(matrix);const char* bits=std::strchr(matrix,':');
    if(bits&&size>=21&&size<=85&&std::strlen(bits+1)==size_t(size*size)){++bits;int scale=std::min(8,440/size);c.rectangle(75,410,size*scale,size*scale,static_cast<ps5::demo::Color>(prospero_palette::raw_ink(0xffffff)));for(int y=0;y<size;y++)for(int x=0;x<size;x++)if(bits[y*size+x]=='1')c.rectangle(75+x*scale,410+y*scale,scale,scale,static_cast<ps5::demo::Color>(prospero_palette::raw_ink(0)));}
-   label(c,600,420,"PAIRING CODE",24,0xa9eab6);title(c,600,470,fields[109].data(),30,1180);
-   wrap(c,600,555,"Scan the QR, or type the address below. Enter this pairing code in your browser. Your device must reach this PS5 on a trusted local network.",1160,4);
-   title(c,75,870,fields[108].data(),24,1750);label(c,600,725,"LEFT / RIGHT  Choose network address",24);label(c,600,775,fields[110].data(),24);
+   label(c,640,390,"PAIRING CODE",24,0xa9eab6);title(c,640,440,fields[109].data(),72,1160);
+   wrap(c,640,555,"Scan the QR or open the address below. Enter the code on your phone or computer.",1140,2);
+   wrap(c,640,635,"Use the same local network. Keep this screen open.",1140,1);
+   label(c,640,715,"BROWSER ADDRESS",24,0xa9eab6);title(c,640,760,fields[108].data(),36,1150);
+   const char* separator=std::strchr(fields[110].data(),'/');if(separator&&std::atoi(separator+1)>1){label(c,640,840,"LEFT / RIGHT  Choose network address",24);label(c,1600,840,fields[110].data(),24);}
   }else wrap(c,75,470,"No usable address yet. Check the PS5 network. Close and reopen this screen to retry the service.",1600,3);
-  label(c,75,950,"CIRCLE  Stop service and revoke browser access",24);
+
  }else if(page==14){
   title(c,70,225,fields[82].data(),64,1750);content_icon(c,85,365,96,fields[96].data());title(c,220,385,fields[85].data(),36,1550);wrap(c,85,515,fields[70].data(),1640,3);
   action(c,760,740,520,"CANCEL",row==0,true);action(c,1320,740,520,"UNINSTALL",row==1);
@@ -352,14 +354,14 @@ inline void compose(Canvas& c) noexcept {
 #ifdef PROSPERO_TOOLKIT
  c.end_content();
 #endif
- if(std::strcmp(fields[64].data(),"BUSY")==0){
+ if(page!=15&&std::strcmp(fields[64].data(),"BUSY")==0){
   if(page==12&&fields[102][0])content_icon(c,78,924,46,fields[102].data());if(page!=3)title(c,page==12&&fields[102][0]?144:78,942,fields[2].data(),24,1230,0xaac8b2);label(c,1450,942,fields[21].data(),24,0xaac8b2);
 #ifdef PROSPERO_TOOLKIT
   c.progress(number(20));
 #else
   c.rounded(72,982,1770,5,2,ink(0x233c2c));if(number(20)>0)c.rounded(72,982,unsigned(1770*number(20)/1000),5,2,ink(0xa9eab6));
 #endif
- }else if(page!=3)title(c,78,949,fields[2].data(),24,1760,0x83a58d);
+ }else if(page!=3&&page!=15&&page!=16)title(c,78,949,fields[2].data(),24,1760,0x83a58d);
  control_label(c,76,1020,desktop.cursor?"Click Select    Right click / Esc Back    Arrows Navigate    Enter Confirm    Tab Pages    F1 Controls":fields[7].data(),20,0x7d9f89);label(c,1650,1020,PROSPERO_APP_VERSION,24,0x7d9f89);
 }
 #ifdef PROSPERO_TOOLKIT

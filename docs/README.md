@@ -13,6 +13,7 @@ history; a development entry does not imply a public release.
 | Full target preparation, ownership and archived source | [Source organization](source-organization.md) |
 | Shared bootstrap, current identity and legacy package audits | [Tooling sharing](tooling-sharing.md) |
 | Published 167 scope | [Release notes](releases/client-input-fabric-167.md), [console acceptance](validation/client167-console-acceptance-2026-10-30.json) |
+| Local171 — pairing/layout/voice-thread repair; console pending | [Test guide](client-local-management-171.md) |
 | Local 170 — input/web/microphone console checks pending | [Test guide](client-local-management-170.md), [capture investigation](controller-microphone-investigation.md) |
 | Local 168 candidate — console acceptance pending | [Test guide](client-shared-tooling-test-168.md) |
 | Documentation migration and original maintainer narrative | [History index](documentation-history.md) |

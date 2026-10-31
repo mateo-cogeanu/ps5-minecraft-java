@@ -132,7 +132,8 @@ public final class ProsperoLauncher {
  private void openWeb()throws Exception {
   if(busy||webMutating)throw new java.io.IOException("Wait for the current operation before opening local management");
   stopWeb();page=15;webAddress=0;webError="Starting";
-  try{web=new ProsperoWeb(library,new ProsperoWeb.Owner(){
+  try{final String selectedInstance=detail.id;web=new ProsperoWeb(library,new ProsperoWeb.Owner(){
+   public String selectedInstance(){return selectedInstance;}
    public Object snapshot(){synchronized(ProsperoLauncher.this){return Map.of("instances",library.instances().stream().map(i->Map.of("id",i.id,"name",i.name,"version",i.version,"loader",i.loader,"icon",i.icon)).toList(),"theme",ProsperoTheme.web(library.settings().theme));}}
    public void begin()throws Exception{synchronized(ProsperoLauncher.this){if(page!=15||busy||launch||webMutating)throw new ProsperoWeb.Refused(409,"Instance content is locked by the launcher or game");webMutating=true;cached=null;}}
    public void end(boolean changed){synchronized(ProsperoLauncher.this){webMutating=false;if(changed){localContent=List.of();message="Browser content updated. Reopen Installed to refresh.";}cached=null;}}
@@ -282,10 +283,10 @@ public final class ProsperoLauncher {
     if(buttons!=0)cached=null;return state();
    }
    if(page==5){
-    if((buttons&0x80)!=0){if(row==8)row=9;else if(row==3)row=2;else if(row==7)row=4;else if(row==6)row=5;}
-    if((buttons&0x20)!=0){if(row==9)row=8;else if(row==2)row=3;else if(row==4)row=7;else if(row==5)row=6;}
-    if((buttons&0x10)!=0){if(row==0)top=true;else row=switch(row){case 1->0;case 2,3->1;case 4->2;case 7->3;case 5->4;case 8,9->5;default->7;};}
-    if((buttons&0x40)!=0)row=switch(row){case 0->1;case 1->2;case 2->4;case 3->7;case 4->5;case 7->6;case 5,6->8;default->row;};
+    if((buttons&0x80)!=0){if(row==9)row=8;else if(row==3)row=2;else if(row==7)row=4;else if(row==6)row=5;}
+    if((buttons&0x20)!=0){if(row==8)row=9;else if(row==2)row=3;else if(row==4)row=7;else if(row==5)row=6;}
+    if((buttons&0x10)!=0){if(row==0)top=true;else row=switch(row){case 1->0;case 2,3->1;case 4->2;case 7->3;case 5->8;case 6->9;case 8->4;default->7;};}
+    if((buttons&0x40)!=0)row=switch(row){case 0->1;case 1->2;case 2->4;case 3->7;case 4->8;case 7->9;case 8->5;case 9->6;default->row;};
    }else if((buttons&0x10)!=0){if(row==0)top=true;else row--;}
    if(page!=5&&(buttons&0x40)!=0)row=Math.min(page==1?4:page==2?6:page==3?0:page==4?(ProsperoChannel.offline()&&offlineAccount!=null?3:2):page==5?6:2,row+1);
    int direction=(buttons&0x80)!=0?-1:(buttons&0x20)!=0?1:0;
@@ -299,7 +300,7 @@ public final class ProsperoLauncher {
     else if(page==2){if(row==6){dropdown(8,library.settings().theme);cached=null;return state();}if(row==5){page=13;row=0;cached=null;return state();}var settings=library.settings();if(row==0){dropdown(3,settings.resolution);cached=null;return state();}if(row==1){dropdown(4,settings.workers-1);cached=null;return state();}if(row==2)settings.reducedMotion=!settings.reducedMotion;if(row==3){settings.snapshots=!settings.snapshots;versions=List.of();}if(row==4)settings.showIntro=!settings.showIntro;library.save();}
     else if(page==3&&row==0){if(session==null)signIn();else{cancel();session=null;avatar="";accounts.clear();message="Signed out. Saved account removed from this console.";}}
     else if(!top&&page==4){if(row==0){play();cached=null;return state();}else if(row==1){page=5;row=0;}else if(row==2)install(false);else if(row==3)playOffline();}
-    else if(page==5){if(row==9){page=16;row=0;return state();}if(row==8){openWeb();return state();}if(row==7){duplicateInstance();cached=null;return state();}if(row>=2&&row<=4&&!busy){openContent(ProsperoModrinth.Kind.values()[row-2]);cached=null;return state();}if(row==0)beginName(5);if(row==1){dropdown(2,detail.icon);cached=null;return state();}if(row==5){page=4;row=0;}if(row==6){if(busy){message="Wait for the current task before deleting an instance.";feedback("error");}else{page=9;row=0;}}}
+    else if(page==5){if(row==9){page=16;row=0;cached=null;return state();}if(row==8){openWeb();return state();}if(row==7){duplicateInstance();cached=null;return state();}if(row>=2&&row<=4&&!busy){openContent(ProsperoModrinth.Kind.values()[row-2]);cached=null;return state();}if(row==0)beginName(5);if(row==1){dropdown(2,detail.icon);cached=null;return state();}if(row==5){page=4;row=0;}if(row==6){if(busy){message="Wait for the current task before deleting an instance.";feedback("error");}else{page=9;row=0;}}}
    }
    if(buttons!=0)cached=null;
   }catch(Exception error){message=friendly(error);feedback("error");}
@@ -324,9 +325,9 @@ public final class ProsperoLauncher {
   f[77]=""+feedbackSerial;f[78]=feedbackCue;f[79]=library.settings().vibration?"ON":"OFF";
   if(page==16){f[82]=library.settings().microphoneEnabled?"ON":"OFF";f[85]=microphoneResult;}
   if(page==15){
-   f[107]=web==null?webError:web.status().state();f[108]="";f[109]="";f[110]="";
+   f[7]="CIRCLE  Close browser management";f[107]=web==null?webError:web.status().state();f[108]="";f[109]="";f[110]="";
    if(web!=null){var status=web.status();if(!status.addresses().isEmpty()&&status.state().equals("Ready")){
-    webAddress=Math.floorMod(webAddress,status.addresses().size());String address="http://"+status.addresses().get(webAddress)+":"+status.port()+"/instance/"+detail.id;
+    webAddress=Math.floorMod(webAddress,status.addresses().size());String address="http://"+status.addresses().get(webAddress)+":"+status.port()+"/i";
     f[108]=address;f[109]=web.pairing();f[110]=(webAddress+1)+" / "+status.addresses().size();
     var qr=ProsperoQrCode.encodeText(address,ProsperoQrCode.Ecc.MEDIUM);StringBuilder matrix=new StringBuilder();int size=qr.size+8;matrix.append(size).append(':');for(int y=-4;y<qr.size+4;y++)for(int x=-4;x<qr.size+4;x++)matrix.append(qr.getModule(x,y)?'1':'0');f[102]=matrix.toString();
    }}
