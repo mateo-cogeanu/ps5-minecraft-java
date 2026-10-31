@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-31",
+  "app_version": "01.000.173",
+  "title_id": "PPSA99874",
+  "production_implementation_commit": "fec256a2f15b651f933590eee994616eaeea04bb",
+  "host_fixture_fix_commit": "5c7f97ea51ac27e6d61668a447a69dfa235d2c25",
+  "runtime": "Unchanged from172,commit909a639; opt-in64MiB owned stack budget retained",
+  "acceptance": "LOCAL ONLY; exact173 PS5 pass pending; no release/prerelease/Store update",
+  "artifacts_sha256": {
+    "PPSA99874.zip": "f1f1ca40812a647b71236e4d20a913ba2f42e0bf4807333501d545f879715f72",
+    "bootstrap-symbols.elf": "475f083b2b613e3faf63484c3465948629d6d36d6e1639f0e4aa20d34ff1728d",
+    "client173-openal-source-relink.zip": "7edf9a96deb1660ba1737249392d79d0ec5ac1b9664518ac2b60a3aa1e47a7ae"
+  },
+  "console172_evidence": {
+    "retrieval": "Safari live session and current native stderr; raw reports stay local",
+    "primary_audio": "Game adopts genuine pre-JVM port,creates context,submits PCM",
+    "voice_playback": "Two later default playback opens refused with0x8026000d; generic SVC speaker/OS warning",
+    "loopback": "Device opens; context throws al::tss::tss(T),matching upstream per-context native key setter refusal",
+    "capture": "After loopback failure,SVC requests StereoFloat32; existing mono-only capture rejects. Java fallback jsound unavailable. No speech/mute/two-way pass."
+  },
+  "changes": {
+    "output": "Attempt two genuine output reservations before JVM pressure; second failure nonfatal; each logical device owns one;retain at most two drained ports;additional late opens remain real failures",
+    "context_errors": "Scoped compiler-TLS generation-tagged errors,16context capacity,per-thread isolation,no native key per context,explicit exhaustion and no generation wrap",
+    "originals": "Game/mod JARs,worlds,account data,shader settings unchanged"
+  },
+  "checks": {
+    "host_fast": "15 PASS",
+    "host_native": "7 PASS,ASan/UBSan",
+    "actual_OpenAL": "PASS existing modes plus20dual-playback+loopback context lifecycles; distinct sources produce nonzero PCM at both port fixtures;late native opens denied,no extra opens/closes;context error isolation and original mono capture20lifecycles",
+    "portable": "PASS source-only archive with empty dependency cache and outside-root fast15/native7;final fixture source-only native7 repeated",
+    "target": "PASS complete173 SDK compile/link/signatures/package",
+    "startup_host": "PASS original unmodified Main reaches expected absent host-native boundary;not PS5 startup proof",
+    "package": "PASS complete package audit,secondary-port symbol and exact ThreadError source hash;constructor counts unchanged",
+    "relink": "PASS normal and accepted-OpenAL replacement both exact ELF;104input hashes/sizes,ZIPCRC,corresponding modified context layout/header",
+    "docs": "PASS1715 local links and git diff --check",
+    "hosted_policy": {
+      "commit": "5c7f97ea51ac27e6d61668a447a69dfa235d2c25",
+      "url": "https://github.com/mateo-cogeanu/ProsperoCraft/actions/runs/41207506378",
+      "policy (macos-15)": "success",
+      "policy (ubuntu-24.04)": "success"
+    },
+    "hosted_native": {
+      "commit": "5c7f97ea51ac27e6d61668a447a69dfa235d2c25",
+      "url": "https://github.com/mateo-cogeanu/ProsperoCraft/actions/runs/41207519261",
+      "native (macos-15)": "success",
+      "native (ubuntu-24.04)": "success"
+    },
+    "initial_Linux_fixture_failure": "fec256a global pthread key-set interposition blocked ASan startup;fixed5c7f97e scopes refusal to implementation and keeps sanitizer/runtime keys normal. No production binary change."
+  },
+  "limits": [
+    "Second early native output reservation may still fail on PS5;failure is recorded and nonfatal",
+    "16simultaneous context-error slots;explicit failure at capacity",
+    "Underlying late native allocation refusal remains;no universal audio/mod support claim",
+    "Mono system-selected microphone remains;stereo workaround may still be rejected if version detection fails elsewhere"
+  ],
+  "console_pending": [
+    "same instance/world load,game audio and selected voice speaker",
+    "another consenting participant heard alongside game sounds",
+    "loopback/OpenAL version detection and microphone speech/hardware mute/routing",
+    "world/server transitions,save/reload,haptics,endurance and resource cleanup"
+  ]
+}
