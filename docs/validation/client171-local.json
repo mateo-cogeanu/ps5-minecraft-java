@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-31",
+  "app_version": "01.000.171",
+  "title_id": "PPSA99874",
+  "implementation_commit": "112c38e05c28a4c8c0a79207560b2bfc36dfe4af",
+  "runtime_commit": "b17befb",
+  "acceptance": "LOCAL ONLY; physical console pending; no release/Store approval",
+  "artifacts_sha256": {
+    "PPSA99874.zip": "f93f2a2e85c308ab7e8346fa0e87164da1d6d99ea5ae8bb8dc86745a9e05be96",
+    "bootstrap-symbols.elf": "7642c7d973635361fbb3aef98f190ce1d1bc6baec028811d2f3ec4331ea7c543",
+    "client171-openal-source-relink.zip": "877fb84ed57cc5156e459083c33f31fb377c5961a2183c8817b5d85bb4e3a96c"
+  },
+  "checks": {
+    "fast": "15 PASS",
+    "native": "6 PASS",
+    "runtime_exception_globals": "PASS genuine LLVM18 source HAS_THREAD_LOCAL,800 worker lifecycles,isolation/reuse,nested throws/rethrow with native key setter refusing; actual target compiler-TLS entrypoints audited",
+    "runtime_compiler_tls_adapter": "PASS actual refused/false-success/stale keys,lifecycle,destructor ordering,join/create,generation and cleanup regression",
+    "browser": "PASS Firefox /i redirect,lowercase raw six-character input auto-hyphen,successful pairing directly to selected instance",
+    "native_UI": "PASS production Vulkan toolkit via host lavapipe; bottom Done/Delete; pairing footer stale-status pixel regression. Not PS5 GPU evidence",
+    "startup_host": "PASS original unchanged Main reaches expected absent host-native boundary",
+    "package": "PASS complete startup package audit including actual final compiler-TLS exception entrypoints",
+    "relink": "PASS normal and replacement-OpenAL both byte-identical to final ELF; input manifest hashes/sizes and ZIP CRC checked",
+    "documentation": "PASS1711 local links",
+    "hosted": "Implementation policy run41202342991: macOS passed; Ubuntu in progress at record creation"
+  },
+  "crash": {
+    "observed_build": "01.000.170",
+    "retrieval": "Cyberduck current-day native crash reports and mounted previous native stderr/startup; raw files local only",
+    "finding": "VoicechatSoundManag SIGABRT, matching170 symbols: AudioOut open refusal0x8026000d then C++ exception globals pthread key setter refusal abort",
+    "repair": "Explicit runtime-owned genuine LLVM compiler-TLS exception globals branch; SDK archives/defaults unchanged",
+    "unresolved": "Underlying AudioOut refusal; PS5 recovery,voice functionality and world launch unvalidated"
+  },
+  "console_pending": [
+    "readable pairing/lowercase/QR and real LAN reachability",
+    "bottom Done/Delete and right-grid Microphone with controller/pointer",
+    "no pairing footer overlap",
+    "non-silent microphone speech/hardware mute/route changes",
+    "original voice chat mod world launch/error recovery",
+    "save/reload,endurance"
+  ]
+}

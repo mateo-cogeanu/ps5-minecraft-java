@@ -44,6 +44,14 @@ def without_build_id(blob):
  return bytes(result)
 audit_current_identity(package)
 elf=work/f'bootstrap-{APP_VERSION}-symbols.elf';text=subprocess.check_output([str(LLVM/'llvm-nm'),'--defined-only',str(elf)],text=True);symbols={l.split()[-1]:int(l.split()[0],16)for l in text.splitlines()if len(l.split())==3}
+# The exact linked exception entrypoints must use compiler TLS, not SDK keys.
+cxxabi_pin=json.loads((ROOT/'build/client-gpu/cxxabi-tls.json').read_text())
+assert cxxabi_pin['object_sha256']==sha((ROOT/'build/client-gpu/cxxabi-tls.o').read_bytes())
+for entry in ['__cxa_get_globals','__cxa_get_globals_fast']:
+ code=subprocess.check_output([str(LLVM/'llvm-objdump'),'-d','--disassemble-symbols='+entry,str(elf)],text=True)
+ assert '__emutls_get_address' in code,code
+ assert 'pthread_' not in code,code
+
 for tls_name in ['prospero_sdl_tls_preinit','SDL_PS5TLSMalloc','SDL_PS5TLSRealloc','prospero_controlify_events_preinit','prospero_controlify_PollEvent','prospero_controlify_SetEventFilter','prospero_controlify_GetEventFilter']:assert tls_name in symbols
 sdl_tls_obj=ROOT/'build/sdl3-native/CMakeFiles/SDL3-static.dir/src/thread/pthread/SDL_systls.c.o'
 sdl_tls_undef=subprocess.check_output([str(LLVM/'llvm-nm'),'--undefined-only',str(sdl_tls_obj)],text=True)
