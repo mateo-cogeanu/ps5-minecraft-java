@@ -29,3 +29,5 @@ guides are in the linked history archive. Generated previews stay under ignored
 `build/`. Existing upstream toolkit documentation remains pinned with its original
 source and licenses; its omitted-upstream-file links are recorded separately by
 the documentation checker.
+
+[Local build storage cleanup](local-build-storage.md)
