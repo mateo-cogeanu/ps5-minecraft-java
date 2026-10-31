@@ -42,6 +42,9 @@ The manual native lane instead tests scoped native implementations against fixtu
 | `test_launcher_storage.py` | Python + JDK25 + pinned Gson/Fabric; temporary deterministic fixtures; required fast |
 | `test_openal_mixer_workers.py` | Clang/Clang++, ASan/UBSan; desktop needs Gson/JDK; JNI needs platform headers; required native |
 
+| `test_launcher_web.py` | Required fast lane; real local sockets, controlled addresses/storage, no account or console |
+| `test_microphone_capture.py` | Required native lane; actual capture core with AudioIn doubles under ASan/UBSan; no physical capture |
+
 ## Retained package and release regressions
 
 | Entrypoint in `tools/` | Dependencies and boundary |
@@ -156,9 +159,6 @@ The manual native lane instead tests scoped native implementations against fixtu
 | `test_snapshot6_jna.py` | Verified publisher/game/mod JARs or prepared build/cache fixtures; live variants may contact services; excluded from offline lane; observed: hardcoded JDK |
 | `test_vanilla_server.py` | Verified publisher/game/mod JARs or prepared build/cache fixtures; live variants may contact services; excluded from offline lane; observed: hardcoded Homebrew |
 | `test_world_metadata.py` | Verified publisher/game/mod JARs or prepared build/cache fixtures; live variants may contact services; excluded from offline lane; observed: hardcoded Homebrew |
-
-| `test_launcher_web.py` | Required fast lane; real local sockets, controlled addresses/storage, no account or console |
-| `test_microphone_capture.py` | Required native lane; actual capture core with AudioIn doubles under ASan/UBSan; no physical capture |
 
 ## Additional host-native fixtures
 
